@@ -46,7 +46,6 @@ ktor {
 }
 
 application {
-    // Define the main class for the application.
     mainClass.set("no.nav.paw.arbeidssokerregisteret.profilering.AppKt")
 }
 
@@ -55,8 +54,10 @@ tasks.named<Test>("test") {
     useJUnitPlatform()
 }
 
-//tasks.withType(Jar::class) {
-//    manifest {
-//        attributes["Implementation-Version"] = project.version
-//    }
-//}
+tasks.withType(Jar::class) {
+    manifest {
+        attributes["Implementation-Version"] = project.version
+        attributes["Implementation-Title"] = rootProject.name
+        attributes["Main-Class"] = application.mainClass.get()
+    }
+}
