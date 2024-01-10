@@ -16,7 +16,7 @@ repositories {
 }
 
 val arbeidssokerregisteretVersion = "23.12.18.110-1"
-val navCommonModulesVersion = "2.2023.01.02_13.51-1c6adeb1653b"
+val navCommonModulesVersion = "3.2023.12.12_13.53-510909d4aa1a"
 val logstashVersion = "7.3"
 val logbackVersion = "1.4.12"
 val pawUtilsVersion = "23.12.20.5-1"
@@ -30,6 +30,7 @@ dependencies {
     implementation(pawObservability.bundles.ktorNettyOpentelemetryMicrometerPrometheus)
     implementation("no.nav.paw.hoplite-config:hoplite-config:$pawUtilsVersion")
 
+    implementation("no.nav.common:token-client:$navCommonModulesVersion")
     //logging
     implementation("no.nav.common:log:$navCommonModulesVersion")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
