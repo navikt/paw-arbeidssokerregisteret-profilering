@@ -19,7 +19,7 @@ val arbeidssokerregisteretVersion = "23.12.18.110-1"
 val navCommonModulesVersion = "3.2023.12.12_13.53-510909d4aa1a"
 val logstashVersion = "7.3"
 val logbackVersion = "1.4.12"
-val pawUtilsVersion = "23.12.20.5-1"
+val pawUtilsVersion = "24.01.10.8-1"
 val aaRegClientVersion = "0.1.8"
 
 val schema by configurations.creating {
