@@ -1,0 +1,5 @@
+url = "${PDL_URL}"
+tema = "OPP"
+namespace = "pdl"
+pdlCluster = "${PDL_CLUSTER}"
+appName = "pdl-api"

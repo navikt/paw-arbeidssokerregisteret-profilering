@@ -2,15 +2,14 @@ package no.nav.paw.arbeidssokerregisteret.profilering.application
 
 import no.nav.paw.arbeidssokerregisteret.api.v1.OpplysningerOmArbeidssoeker
 import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
+import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoTjeneste
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
-import org.apache.kafka.streams.kstream.Suppressed
-import java.time.Duration
 
 fun applicationTopology(
     suppressionConfig: SuppressionConfig<Long, Periode>,
     streamBuilder: StreamsBuilder,
-    arbeidsforholdTjeneste: ArbeidsforholdTjeneste,
+    personInfoTjeneste: PersonInfoTjeneste,
     applicationConfiguration: ApplicationConfiguration
 ): Topology {
     val periodeTabell = streamBuilder
@@ -26,10 +25,10 @@ fun applicationTopology(
                 identitetsnummer to opplysninger
             }
         }.mapValues { _, (identitetsnummer, opplysninger) ->
-            val arbeidsforhold = arbeidsforholdTjeneste.arbeidsforhold(identitetsnummer, opplysninger.id)
-            arbeidsforhold to opplysninger
-        }.mapValues { _, (arbeidsforhold, opplysninger) ->
-            profiler(arbeidsforhold, opplysninger)
+            val personInfo = personInfoTjeneste.hentPersonInfo(identitetsnummer, opplysninger.id)
+            personInfo to opplysninger
+        }.mapValues { _, (personInfo, opplysninger) ->
+            profiler(personInfo, opplysninger)
         }
     return streamBuilder.build()
 }

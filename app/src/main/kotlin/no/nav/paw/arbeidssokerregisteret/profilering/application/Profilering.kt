@@ -1,24 +1,37 @@
 package no.nav.paw.arbeidssokerregisteret.profilering.application
 
 import no.nav.paw.aareg.Arbeidsforhold
-import no.nav.paw.arbeidssokerregisteret.api.v1.JaNeiVetIkke
 import no.nav.paw.arbeidssokerregisteret.api.v1.OpplysningerOmArbeidssoeker
 import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
+import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfo
 import java.time.Duration
+import java.time.Instant
 import java.time.LocalDate
 
+enum class ProfileringsTagger {
+    ANDRE_FORHOLD_HINDRER_ARBEID,
+    HELSETILSTAND_HINDRER_ARBEID,
+    ALDER_INDIKERER_STANDARD_INNSATS,
+    HAR_BESTAATT_GODKJENT_UTDANNING,
+    HAR_JOBBET_SAMMENHENGENDE_I_6_AV_DE_SISTE_12_MND,
+    UKJENT_ALDER
+}
+
 fun profiler(
-    arbeidsforhold: List<Arbeidsforhold>,
+    personInfo: PersonInfo,
     opplysninger: OpplysningerOmArbeidssoeker
 ): Profilering {
-    val helseHinderEllerAndreForhold = opplysninger.annet.andreForholdHindrerArbeid == JaNeiVetIkke.JA ||
-            opplysninger.helse.helsetilstandHindrerArbeid == JaNeiVetIkke.JA
+ TODO()
+}
+
+
+fun anbefalerStandardInnsats(
+    opplysninger: OpplysningerOmArbeidssoeker,
+    oppfylerKravTilArbeidsErfaring: Boolean
+): Boolean {
     TODO()
 }
 
-fun anbefalerStandardInnsats(opplysninger: OpplysningerOmArbeidssoeker, oppfylerKravTilArbeidsErfaring: Boolean): Boolean {
-    TODO()
-}
 fun List<SammhengendeJobb>.maksSammenhengendeJobbIPeriode(periode: OpenEndRange<LocalDate>): Duration {
     TODO()
 }

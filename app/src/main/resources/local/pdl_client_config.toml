@@ -1,0 +1,5 @@
+url = "localhost:8082"
+tema = "OPP"
+namespace = "pdl"
+pdlCluster = "local"
+appName = "pdl-api"

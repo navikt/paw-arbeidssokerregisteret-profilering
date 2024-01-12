@@ -20,7 +20,8 @@ val navCommonModulesVersion = "3.2023.12.12_13.53-510909d4aa1a"
 val logstashVersion = "7.3"
 val logbackVersion = "1.4.12"
 val pawUtilsVersion = "24.01.11.9-1"
-val aaRegClientVersion = "0.1.8"
+val pawPdlClientsVersion = "24.01.12.26-1"
+val pawAaRegClientVersion = "24.01.12.16-1"
 
 val schema by configurations.creating {
     isTransitive = false
@@ -28,11 +29,21 @@ val schema by configurations.creating {
 
 dependencies {
     schema("no.nav.paw.arbeidssokerregisteret.api.schema:eksternt-api:$arbeidssokerregisteretVersion")
-    implementation("no.nav.paw:aareg-client:$aaRegClientVersion")
+    implementation("no.nav.paw:aareg-client:$pawAaRegClientVersion")
+    implementation("no.nav.paw:pdl-client:$pawPdlClientsVersion")
+
     implementation(pawObservability.bundles.ktorNettyOpentelemetryMicrometerPrometheus)
     implementation("no.nav.paw.hoplite-config:hoplite-config:$pawUtilsVersion")
 
     implementation("no.nav.common:token-client:$navCommonModulesVersion")
+
+    //Ktor client
+    implementation("io.ktor:ktor-server-status-pages:${pawObservability.versions.ktor}")
+    implementation("io.ktor:ktor-serialization-jackson:${pawObservability.versions.ktor}")
+    implementation("io.ktor:ktor-client-okhttp-jvm:${pawObservability.versions.ktor}")
+    implementation("io.ktor:ktor-client-logging-jvm:${pawObservability.versions.ktor}")
+    implementation("io.ktor:ktor-client-content-negotiation:${pawObservability.versions.ktor}")
+
     //logging
     implementation("no.nav.common:log:$navCommonModulesVersion")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")

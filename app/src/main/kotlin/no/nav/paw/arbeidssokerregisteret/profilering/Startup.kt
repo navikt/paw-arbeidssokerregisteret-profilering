@@ -9,14 +9,14 @@ import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import kotlinx.coroutines.runBlocking
 import no.nav.paw.aareg.AaregClient
-import no.nav.paw.arbeidssokerregisteret.profilering.aareg.AAREG_CONFIG_FILE
-import no.nav.paw.arbeidssokerregisteret.profilering.aareg.AaRegClientConfig
+import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.aareg.AaRegClientConfig
 import no.nav.paw.arbeidssokerregisteret.profilering.application.APPLICATION_CONFIG_FILE
 import no.nav.paw.arbeidssokerregisteret.profilering.application.ApplicationConfiguration
 import no.nav.paw.arbeidssokerregisteret.profilering.application.applicationTopology
-import no.nav.paw.arbeidssokerregisteret.profilering.aareg.authentication.AZURE_CONFIG_FILE
-import no.nav.paw.arbeidssokerregisteret.profilering.aareg.authentication.m2mTokenFactory
+import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.authentication.AZURE_CONFIG_FILE
+import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.authentication.m2mTokenFactory
 import no.nav.paw.arbeidssokerregisteret.profilering.application.SuppressionConfig
+import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoTjeneste
 import no.nav.paw.arbeidssokerregisteret.profilering.utils.AdditionalMeterBinders
 import no.nav.paw.arbeidssokerregisteret.profilering.utils.ApplicationInfo
 import no.nav.paw.config.hoplite.loadNaisOrLocalConfiguration
@@ -35,20 +35,11 @@ fun main() {
     logger.info("Starter: {}", ApplicationInfo.id)
     val prometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
     val kafkaConfig = loadNaisOrLocalConfiguration<KafkaConfig>(KAFKA_CONFIG_WITH_SCHEME_REG)
-    val aaRegClient = with(m2mTokenFactory(loadNaisOrLocalConfiguration(AZURE_CONFIG_FILE))) {
-        with(loadNaisOrLocalConfiguration<AaRegClientConfig>(AAREG_CONFIG_FILE)) {
-            AaregClient(url) { create(scope) }
-        }
-    }
     val streamsBuilder = StreamsBuilder()
     val applicationConfig = loadNaisOrLocalConfiguration<ApplicationConfiguration>(APPLICATION_CONFIG_FILE)
     val topology = applicationTopology(
         streamBuilder = streamsBuilder,
-        arbeidsforholdTjeneste = { identitetsnummer, opplysningerId ->
-            runBlocking {
-                aaRegClient.hentArbeidsforhold(identitetsnummer, opplysningerId.toString())
-            }
-        },
+        personInfoTjeneste = PersonInfoTjeneste.create(),
         applicationConfiguration = applicationConfig,
         suppressionConfig = SuppressionConfig(
             stateStoreName = "periodeTombstoneDelayStore",
