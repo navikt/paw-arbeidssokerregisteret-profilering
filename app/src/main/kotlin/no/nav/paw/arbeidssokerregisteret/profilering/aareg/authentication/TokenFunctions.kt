@@ -1,4 +1,4 @@
-package no.nav.paw.arbeidssokerregisteret.profilering.authentication
+package no.nav.paw.arbeidssokerregisteret.profilering.aareg.authentication
 
 import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.jwk.RSAKey

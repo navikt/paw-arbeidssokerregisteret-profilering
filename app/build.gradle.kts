@@ -19,7 +19,7 @@ val arbeidssokerregisteretVersion = "23.12.18.110-1"
 val navCommonModulesVersion = "3.2023.12.12_13.53-510909d4aa1a"
 val logstashVersion = "7.3"
 val logbackVersion = "1.4.12"
-val pawUtilsVersion = "24.01.10.8-1"
+val pawUtilsVersion = "24.01.11.9-1"
 val aaRegClientVersion = "0.1.8"
 
 val schema by configurations.creating {
@@ -40,9 +40,12 @@ dependencies {
 
     //Kafka
     implementation("no.nav.paw.kafka:kafka:$pawUtilsVersion")
+    implementation("no.nav.paw.kafka-streams:kafka-streams:$pawUtilsVersion")
     implementation("io.confluent:kafka-avro-serializer:7.5.3")
+    implementation("io.confluent:kafka-streams-avro-serde:7.5.3")
     implementation("org.apache.avro:avro:1.11.3")
     implementation("org.apache.kafka:kafka-clients:3.6.0")
+    implementation("org.apache.kafka:kafka-streams:3.6.0")
 
     // Use the Kotlin JUnit 5 integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
@@ -72,7 +75,7 @@ ktor {
 }
 
 application {
-    mainClass.set("no.nav.paw.arbeidssokerregisteret.profilering.AppKt")
+    mainClass.set("no.nav.paw.arbeidssokerregisteret.profilering.StartupKt")
 }
 
 tasks.named<Test>("test") {
