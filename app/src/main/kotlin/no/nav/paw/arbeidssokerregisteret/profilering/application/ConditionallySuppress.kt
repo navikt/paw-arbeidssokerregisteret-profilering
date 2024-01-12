@@ -25,10 +25,13 @@ class ConditionallySuppress<K, V>(
         super.init(context)
         this.context = context
         stateStore = context?.getStateStore(config.stateStoreName)
-
+        scheduleEmitSuppressedRecords(
+            requireNotNull(context) { "Context is not initialized" },
+            requireNotNull(stateStore) { "State store is not initialized" }
+        )
     }
 
-    private fun initPunctuator(
+    private fun scheduleEmitSuppressedRecords(
         ctx: ProcessorContext<K, V>,
         stateStore: TimestampedKeyValueStore<K, V>
     ) {
