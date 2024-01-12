@@ -19,20 +19,18 @@ fun applicationTopology(
         .mapValues { _, periode -> if (periode.avsluttet != null) periode else null }
         .toTable()
 
-
-    val opplysninger = streamBuilder
+    streamBuilder
         .stream<Long, OpplysningerOmArbeidssoeker>(applicationConfiguration.opplysningerTopic)
-
-    opplysninger.join(periodeTabell) { opplysninger, periode ->
-        periode?.identitetsnummer?.let { identitetsnummer ->
-            identitetsnummer to opplysninger
+        .join(periodeTabell) { opplysninger, periode ->
+            periode?.identitetsnummer?.let { identitetsnummer ->
+                identitetsnummer to opplysninger
+            }
+        }.mapValues { _, (identitetsnummer, opplysninger) ->
+            val arbeidsforhold = arbeidsforholdTjeneste.arbeidsforhold(identitetsnummer, opplysninger.id)
+            arbeidsforhold to opplysninger
+        }.mapValues { _, (arbeidsforhold, opplysninger) ->
+            profiler(arbeidsforhold, opplysninger)
         }
-    }.mapValues { _, (identitetsnummer, opplysninger) ->
-        val arbeidsforhold = arbeidsforholdTjeneste.arbeidsforhold(identitetsnummer, opplysninger.id)
-        arbeidsforhold to opplysninger
-    }.mapValues { _, (arbeidsforhold, opplysninger) ->
-        profiler(arbeidsforhold, opplysninger)
-    }
     return streamBuilder.build()
 }
 
