@@ -15,7 +15,7 @@ repositories {
     mavenNav("paw-arbeidssokerregisteret")
 }
 
-val arbeidssokerregisteretVersion = "23.12.18.110-1"
+val arbeidssokerregisteretVersion = "24.01.15.119-1"
 val navCommonModulesVersion = "3.2023.12.12_13.53-510909d4aa1a"
 val logstashVersion = "7.3"
 val logbackVersion = "1.4.12"
@@ -60,6 +60,9 @@ dependencies {
 
     // Use the Kotlin JUnit 5 integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+
+    //kotest
+    testImplementation("io.kotest:kotest-runner-junit5-jvm:5.8.0")
 
     // Use the JUnit 5 integration.
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.3")

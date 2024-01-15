@@ -2,6 +2,7 @@ package no.nav.paw.arbeidssokerregisteret.profilering.application
 
 import no.nav.paw.arbeidssokerregisteret.api.v1.OpplysningerOmArbeidssoeker
 import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
+import no.nav.paw.arbeidssokerregisteret.profilering.application.profilering.profiler
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoTjeneste
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
