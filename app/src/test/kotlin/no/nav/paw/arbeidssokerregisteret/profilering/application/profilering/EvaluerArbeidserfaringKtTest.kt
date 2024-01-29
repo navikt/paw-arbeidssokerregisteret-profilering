@@ -11,7 +11,7 @@ import java.time.Period
 class EvaluerArbeidserfaringKtTest : StringSpec({
 
     "evaluerArbeidsErfaring skal returnere ${ProfileringsTagger.OPPFYLLER_KRAV_TIL_ARBEIDSERFARING} hvis kriteriene er møtt" {
-        val marginForSammenhengendeJobb = Duration.ofDays(3)
+        val marginForSammenhengendeJobb = 3
         val minimumsArbeidserfaring = Period.ofMonths(6)
         val periode = LocalDate.now().minusMonths(12)..<LocalDate.now()
         val arbeidsforhold = ProfileringTestData.arbeidsforhold
@@ -28,7 +28,7 @@ class EvaluerArbeidserfaringKtTest : StringSpec({
     }
 
     "evaluerArbeidsErfaring skal returnere tomt set hvis kriteriene ikke er møtt" {
-        val marginForSammenhengendeJobb = Duration.ofDays(3)
+        val marginForSammenhengendeJobb = 3
         val minimumsArbeidserfaring = Period.ofMonths(6)
         val periode = LocalDate.now().minusMonths(12)..<LocalDate.now()
         val arbeidsforhold = ProfileringTestData.arbeidsforhold.copy(
@@ -51,7 +51,7 @@ class EvaluerArbeidserfaringKtTest : StringSpec({
         result shouldBe emptySet()
     }
     "evaluerArbeidsErfaring skal slå sammen to arbeidsforhold hvis de er innenfor marginen" {
-        val marginForSammenhengendeJobb = Duration.ofDays(3)
+        val marginForSammenhengendeJobb = 3
         val minimumsArbeidserfaring = Period.ofMonths(6)
         val periode = LocalDate.now().minusMonths(12)..<LocalDate.now()
         val arbeidsforhold1 = ProfileringTestData.arbeidsforhold.copy(

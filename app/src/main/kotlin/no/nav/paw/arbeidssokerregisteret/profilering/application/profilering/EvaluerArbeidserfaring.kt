@@ -5,9 +5,10 @@ import no.nav.paw.arbeidssokerregisteret.profilering.application.profilering.Pro
 import java.time.Duration
 import java.time.LocalDate
 import java.time.Period
+import java.time.temporal.ChronoUnit
 
 fun evaluerArbeidsErfaring(
-    marginForSammenhengendeJobb: Duration,
+    marginForSammenhengendeJobbDager: Int,
     minimumsArbeidserfaring: Period,
     periode: OpenEndRange<LocalDate>,
     arbeidsforhold: List<Arbeidsforhold>
@@ -15,7 +16,7 @@ fun evaluerArbeidsErfaring(
     val sammenhengendeJobber = lengsteSammenhengendeInnenforPeriode(
         arbeidsforhold = arbeidsforhold,
         periode = periode,
-        marginForSammenhengendeJobb = marginForSammenhengendeJobb
+        marginForSammenhengendeJobbDager = marginForSammenhengendeJobbDager
     )
     return when {
         sammenhengendeJobber == null -> emptySet()
@@ -29,9 +30,9 @@ fun evaluerArbeidsErfaring(
 fun lengsteSammenhengendeInnenforPeriode(
     arbeidsforhold: List<Arbeidsforhold>,
     periode: OpenEndRange<LocalDate>,
-    marginForSammenhengendeJobb: Duration
+    marginForSammenhengendeJobbDager: Int
 ): SammhengendeJobb? =
-    arbeidsforhold.flettSammenhengendeJobber(marginForSammenhengendeJobb)
+    arbeidsforhold.flettSammenhengendeJobber(marginForSammenhengendeJobbDager)
         .filter { sammenhengendePeriode ->
             sammenhengendePeriode.tid.contains(periode.start) ||
             sammenhengendePeriode.tid.contains(periode.endExclusive)
@@ -41,24 +42,24 @@ fun SammhengendeJobb.periodeInnenfor(periode: OpenEndRange<LocalDate>): OpenEndR
     maxOf(tid.start, periode.start).rangeUntil(minOf(tid.endExclusive, periode.endExclusive))
 
 fun OpenEndRange<LocalDate>.length(): Period = Period.between(start, endExclusive)
-fun List<Arbeidsforhold>.flettSammenhengendeJobber(margin: Duration): List<SammhengendeJobb> =
+fun List<Arbeidsforhold>.flettSammenhengendeJobber(marginInDays: Int): List<SammhengendeJobb> =
     if (isEmpty()) {
         emptyList()
     } else {
         drop(1)
-            .fold(listOf(somSammenhengendeJobb(first(), margin))) { acc, arbeidsforhold ->
+            .fold(listOf(somSammenhengendeJobb(first(), marginInDays))) { acc, arbeidsforhold ->
                 val match = acc.find { it.erDelAv(arbeidsforhold) }
                 if (match != null) {
                     acc - match + match.leggTil(arbeidsforhold)
                 } else {
-                    acc + somSammenhengendeJobb(arbeidsforhold, margin)
+                    acc + somSammenhengendeJobb(arbeidsforhold, marginInDays)
                 }
             }
     }
 
-fun somSammenhengendeJobb(arbeidsforhold: Arbeidsforhold, margin: Duration): SammhengendeJobb {
+fun somSammenhengendeJobb(arbeidsforhold: Arbeidsforhold, marginInDays: Int): SammhengendeJobb {
     return SammhengendeJobb(
-        margin = margin,
+        marginInDays = marginInDays,
         tid = arbeidsforhold.ansettelsesperiode.periode.fom.rangeUntil(
             arbeidsforhold.ansettelsesperiode.periode.tom ?: LocalDate.MAX
         ),
@@ -67,12 +68,12 @@ fun somSammenhengendeJobb(arbeidsforhold: Arbeidsforhold, margin: Duration): Sam
 }
 
 data class SammhengendeJobb(
-    private val margin: Duration,
+    private val marginInDays: Int,
     val tid: OpenEndRange<LocalDate>,
     val arbeidsforhold: List<Arbeidsforhold>
 ) {
-    private val tidMedMargin get() = tid.start.minus(margin).rangeUntil(
-        if (tid.endExclusive == LocalDate.MAX) LocalDate.MAX else tid.endExclusive.plus(margin)
+    private val tidMedMargin get() = tid.start.minus(marginInDays.toLong(), ChronoUnit.DAYS).rangeUntil(
+        if (tid.endExclusive == LocalDate.MAX) LocalDate.MAX else tid.endExclusive.plus(marginInDays.toLong(), ChronoUnit.DAYS)
     )
     fun erDelAv(arbeidsforhold: Arbeidsforhold): Boolean {
         return tidMedMargin.contains(arbeidsforhold.ansettelsesperiode.periode.fom) ||
