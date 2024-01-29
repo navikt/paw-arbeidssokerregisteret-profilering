@@ -4,22 +4,20 @@ import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.jwk.RSAKey
 import no.nav.common.token_client.builder.AzureAdTokenClientBuilder
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient
-import no.nav.paw.arbeidssokerregisteret.profilering.utils.NaisClusterName
-import no.nav.paw.arbeidssokerregisteret.profilering.utils.naisClusterName
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 
 fun m2mTokenFactory(azureConfig: AzureConfig): MachineToMachineTokenFactory {
-    val client = azureAdTokenClient(naisClusterName(), azureConfig)
+    val client = azureAdTokenClient(azureConfig)
     return MachineToMachineTokenFactory { scope ->
         client.createMachineToMachineToken(scope)
     }
 }
 
-fun azureAdTokenClient(naisClusterName: NaisClusterName, azureConfig: AzureConfig): AzureAdMachineToMachineTokenClient {
-    return when (naisClusterName) {
-        NaisClusterName.PROD_GCP, NaisClusterName.DEV_GCP -> AzureAdTokenClientBuilder.builder()
+fun azureAdTokenClient(azureConfig: AzureConfig): AzureAdMachineToMachineTokenClient {
+    return when (System.getenv("NAIS_CLUSTER_NAME")) {
+        "prod-gcp", "dev-gcp" -> AzureAdTokenClientBuilder.builder()
             .withNaisDefaults()
             .buildMachineToMachineTokenClient()
 
