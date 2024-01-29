@@ -1,5 +1,3 @@
-url = "localhost:8082"
+url = "http://localhost:8082/pdl"
 tema = "OPP"
-namespace = "pdl"
-pdlCluster = "local"
-appName = "pdl-api"
+scope = "api://test.pdl.pdl-api/.default"

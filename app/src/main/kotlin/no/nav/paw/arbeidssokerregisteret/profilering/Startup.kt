@@ -7,15 +7,10 @@ import io.micrometer.core.instrument.binder.kafka.KafkaStreamsMetrics
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
-import kotlinx.coroutines.runBlocking
-import no.nav.paw.aareg.AaregClient
-import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.aareg.AaRegClientConfig
 import no.nav.paw.arbeidssokerregisteret.profilering.application.APPLICATION_CONFIG_FILE
 import no.nav.paw.arbeidssokerregisteret.profilering.application.ApplicationConfiguration
-import no.nav.paw.arbeidssokerregisteret.profilering.application.applicationTopology
-import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.authentication.AZURE_CONFIG_FILE
-import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.authentication.m2mTokenFactory
 import no.nav.paw.arbeidssokerregisteret.profilering.application.SuppressionConfig
+import no.nav.paw.arbeidssokerregisteret.profilering.application.applicationTopology
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoTjeneste
 import no.nav.paw.arbeidssokerregisteret.profilering.utils.AdditionalMeterBinders
 import no.nav.paw.arbeidssokerregisteret.profilering.utils.ApplicationInfo
@@ -49,7 +44,7 @@ fun main() {
             suppressDurationType = SuppressionConfig.Type.ANY
         ) { _, value -> value.avsluttet != null }
     )
-    //TODO: Av en eller annen grunn liker ikke kompilatoren:
+    // TODO: Av en eller annen grunn liker ikke kompilatoren:
     // KafkaStreamsFactory(applicationConfig.applicationIdSuffix, kafkaConfig)
     val streamsConfig = (::KafkaStreamsFactory)(applicationConfig.applicationIdSuffix, kafkaConfig)
         .withDefaultKeySerde(SpecificAvroSerde::class)

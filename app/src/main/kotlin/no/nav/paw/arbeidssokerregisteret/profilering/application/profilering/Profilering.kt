@@ -1,17 +1,20 @@
 package no.nav.paw.arbeidssokerregisteret.profilering.application.profilering
 
-import no.nav.paw.arbeidssokerregisteret.api.v1.*
+import no.nav.paw.arbeidssokerregisteret.api.v1.OpplysningerOmArbeidssoeker
+import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
+import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
 import no.nav.paw.arbeidssokerregisteret.profilering.application.profilering.ProfileringsTagger.*
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfo
-import no.nav.paw.arbeidssokerregisteret.profilering.utils.ApplicationInfo
-import java.time.Instant
-import java.util.*
+import java.time.Duration
+import java.time.Period
+import java.time.ZoneId
 
 fun profiler(
     personInfo: PersonInfo,
     opplysninger: OpplysningerOmArbeidssoeker
 ): Profilering {
-    val alder = alderVedTidspunkt(opplysninger.sendtInnAv.tidspunkt, personInfo)
+    val sendtInnTidspunkt = opplysninger.sendtInnAv.tidspunkt
+    val alder = alderVedTidspunkt(sendtInnTidspunkt, personInfo)
     val evalueringer =
         evaluerAnnet(opplysninger.annet) +
                 evaluerAlder(alder) +
@@ -39,7 +42,6 @@ fun Set<ProfileringsTagger>.anbefalerStandardInnsats(): Boolean =
             contains(HAR_BESTAATT_GODKJENT_UTDANNING) &&
             !contains(HELSETILSTAND_HINDRER_ARBEID) &&
             !contains(ANDRE_FORHOLD_HINDRER_ARBEID)
-
 
 
 fun Set<ProfileringsTagger>.anbefalerArbeidsevnevudering(): Boolean =

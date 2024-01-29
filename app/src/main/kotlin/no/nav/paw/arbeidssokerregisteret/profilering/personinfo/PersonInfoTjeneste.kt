@@ -10,7 +10,6 @@ import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.authentication.A
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.authentication.m2mTokenFactory
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.pdl.PDL_CONFIG_FILE
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.pdl.PdlConfig
-import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.pdl.azureAuthScope
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.pdl.createHttpClient
 import no.nav.paw.arbeidssokerregisteret.profilering.utils.ApplicationInfo
 import no.nav.paw.config.hoplite.loadNaisOrLocalConfiguration
@@ -32,7 +31,7 @@ fun interface PersonInfoTjeneste {
                 url = pdlConfig.url,
                 tema = pdlConfig.tema,
                 httpClient = createHttpClient()
-            ) { m2mTokenFactory.create(pdlConfig.azureAuthScope()) }
+            ) { m2mTokenFactory.create(pdlConfig.scope) }
             return PersonInfoTjeneste { identitetsnummer, opplysningsId ->
                 runBlocking(context = Dispatchers.IO) {
                     val arbeidsforholdDeferred = async {

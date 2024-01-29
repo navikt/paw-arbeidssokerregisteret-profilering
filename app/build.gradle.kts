@@ -7,14 +7,6 @@ plugins {
     application
 }
 
-repositories {
-    mavenCentral()
-    maven {
-        url = uri("https://packages.confluent.io/maven/")
-    }
-    mavenNav("paw-arbeidssokerregisteret")
-}
-
 val arbeidssokerregisteretVersion = "24.01.15.119-1"
 val navCommonModulesVersion = "3.2023.12.12_13.53-510909d4aa1a"
 val logstashVersion = "7.3"
@@ -37,19 +29,19 @@ dependencies {
 
     implementation("no.nav.common:token-client:$navCommonModulesVersion")
 
-    //Ktor client
+    // Ktor client
     implementation("io.ktor:ktor-server-status-pages:${pawObservability.versions.ktor}")
     implementation("io.ktor:ktor-serialization-jackson:${pawObservability.versions.ktor}")
     implementation("io.ktor:ktor-client-okhttp-jvm:${pawObservability.versions.ktor}")
     implementation("io.ktor:ktor-client-logging-jvm:${pawObservability.versions.ktor}")
     implementation("io.ktor:ktor-client-content-negotiation:${pawObservability.versions.ktor}")
 
-    //logging
+    // Logging
     implementation("no.nav.common:log:$navCommonModulesVersion")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("net.logstash.logback:logstash-logback-encoder:$logstashVersion")
 
-    //Kafka
+    // Kafka
     implementation("no.nav.paw.kafka:kafka:$pawUtilsVersion")
     implementation("no.nav.paw.kafka-streams:kafka-streams:$pawUtilsVersion")
     implementation("io.confluent:kafka-avro-serializer:7.5.3")
@@ -75,7 +67,6 @@ tasks.named("generateAvroProtocol", GenerateAvroProtocolTask::class.java) {
     source(zipTree(schema.singleFile))
 }
 
-// Apply a specific Java toolchain to ease working on different environments.
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(21))
@@ -93,7 +84,6 @@ application {
 }
 
 tasks.named<Test>("test") {
-    // Use JUnit Platform for unit tests.
     useJUnitPlatform()
 }
 
@@ -102,17 +92,5 @@ tasks.withType(Jar::class) {
         attributes["Implementation-Version"] = project.version
         attributes["Implementation-Title"] = rootProject.name
         attributes["Main-Class"] = application.mainClass.get()
-    }
-}
-
-fun RepositoryHandler.mavenNav(repo: String): MavenArtifactRepository {
-    val githubPassword: String by project
-
-    return maven {
-        setUrl("https://maven.pkg.github.com/navikt/$repo")
-        credentials {
-            username = "x-access-token"
-            password = githubPassword
-        }
     }
 }

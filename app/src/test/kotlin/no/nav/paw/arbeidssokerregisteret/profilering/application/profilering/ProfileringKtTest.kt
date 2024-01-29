@@ -1,67 +1,45 @@
 package no.nav.paw.arbeidssokerregisteret.profilering.application.profilering
 
 import io.kotest.core.spec.style.FreeSpec
-import no.nav.paw.aareg.*
-import no.nav.paw.aareg.Periode
-import no.nav.paw.arbeidssokerregisteret.api.v1.*
-import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfo
-import java.time.Duration
+import io.kotest.matchers.shouldBe
+import no.nav.paw.arbeidssokerregisteret.api.v1.Annet
+import no.nav.paw.arbeidssokerregisteret.api.v1.Helse
+import no.nav.paw.arbeidssokerregisteret.api.v1.JaNeiVetIkke
+import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
 import java.time.LocalDate
-import java.time.Month
-import java.time.ZoneOffset
-import java.util.*
 
-class ProfileringKtTest: FreeSpec({
-    val idag = LocalDate.of(2021, Month.JUNE, 1)
-
-    "En alder på 61 år skal trigge ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING}" {
+class ProfileringKtTest : FreeSpec({
+    "En med alder på 61 år skal gi ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING}" {
+        val sekstiEnAarSiden = LocalDate.now().minusYears(61)
         profiler(
-            personInfo = PersonInfo(
-                foedselsdato = LocalDate.of(1960, Month.MAY, 1),
-                foedselsAar = 1960,
-                arbeidsforhold = listOf(
-                    Arbeidsforhold(
-                        arbeidsgiver = Arbeidsgiver(
-                            type = "Arbeidsgiver",
-                            organisasjonsnummer = "123456789"
-                        ),
-                        ansettelsesperiode = Ansettelsesperiode(
-                            periode = Periode(
-                                fom = LocalDate.of(2018, Month.JANUARY, 1),
-                                tom = idag.minus(Duration.ofDays(2))
-                            )
-                        ),
-                        opplysningspliktig = Opplysningspliktig(
-                            type = "",
-                            organisasjonsnummer = "123456789"
-                        ),
-                        arbeidsavtaler = emptyList(),
-                        registrert = idag.minus(Duration.ofDays(1)).atStartOfDay()
-                    )
-                )
+            ProfileringTestData.standardBrukerPersonInfo.copy(
+                foedselsdato = sekstiEnAarSiden,
+                foedselsAar = sekstiEnAarSiden.year
             ),
-            opplysninger = OpplysningerOmArbeidssoeker(
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                Metadata(
-                    idag.atStartOfDay().toInstant(ZoneOffset.UTC),
-                    Bruker(
-                        BrukerType.SYSTEM,
-                        "junit"
-                    ),
-                    "junit",
-                    "unit-test"
-                ),
-                Utdanning(
-                    Utdanningsnivaa.GRUNNSKOLE,
-                    JaNeiVetIkke.JA,
-                    JaNeiVetIkke.JA,
-                ),
-                Helse(JaNeiVetIkke.NEI),
-                Arbeidserfaring(JaNeiVetIkke.JA),
-                Jobbsituasjon(emptyList()),
-                Annet(JaNeiVetIkke.NEI)
-            )
+            opplysninger = ProfileringTestData.standardOpplysningerOmArbeidssoeker
+        ).profilertTil shouldBe ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
+    }
+    "En med alder innenfor 18..59 og oppfyller krav til arbeidserfaring, utdanning, helsehinder og andre forhold blir profilert til ${ProfilertTil.ANTATT_GODE_MULIGHETER}" {
+        profiler(
+            ProfileringTestData.standardBrukerPersonInfo,
+            ProfileringTestData.standardOpplysningerOmArbeidssoeker
         )
+        // TODO: Add assertions
+    }
+    "En med 'helsehinder' skal gi ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING}" {
+        profiler(
+            ProfileringTestData.standardBrukerPersonInfo,
+            ProfileringTestData.standardOpplysningerOmArbeidssoekerBuilder
+                .setHelse(Helse(JaNeiVetIkke.NEI))
+                .build()
+        ).profilertTil shouldBe ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
+    }
+    "En med 'andre forhold' skal gi ${ProfilertTil.OPPGITT_HINDRINGER}" {
+        profiler(
+            ProfileringTestData.standardBrukerPersonInfo,
+            ProfileringTestData.standardOpplysningerOmArbeidssoekerBuilder
+                .setAnnet(Annet(JaNeiVetIkke.JA))
+                .build()
+        ).profilertTil shouldBe ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
     }
 })

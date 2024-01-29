@@ -1,0 +1,56 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: paw-arbeidssokerregisteret-profilering
+  namespace: paw
+  labels:
+    team: paw
+spec:
+  azure:
+    application:
+      enabled: true
+  image: {{ image }}
+  replicas:
+    min: 0
+    max: 0
+  resources:
+    limits:
+      cpu: 3500m
+      memory: 1000Mi
+    requests:
+      cpu: 400m
+      memory: 200Mi
+  kafka:
+    pool: nav-dev
+  observability:
+    tracing:
+      enabled: true
+  env:
+    - name: OTEL_METRICS_EXPORTER
+      value: "none"
+    - name: OTEL_TRACES_EXPORTER
+      value: "maskert_oltp"
+    - name: OTEL_JAVAAGENT_DEBUG
+      value: "false"
+    - name: AAREG_URL
+      value: https://aareg-services-q1.dev-fss-pub.nais.io/api/v1/arbeidstaker/arbeidsforhold
+    - name: AAREG_SCOPE
+      value: api://dev-fss.aareg.aareg-api/.default
+    - name: PDL_URL
+      value: https://pdl-api.dev-fss-pub.nais.io/graphql
+    - name: PDL_SCOPE
+      value: api://dev-fss.pdl.pdl-api/.default
+  accessPolicy:
+    outbound:
+      external:
+        - host: pdl-api.dev-fss-pub.nais.io
+        - host: aareg-services-q1.dev-fss-pub.nais.io
+  liveness:
+    path: /isAlive
+    initialDelay: 10
+  readiness:
+    path: /isReady
+    initialDelay: 10
+  prometheus:
+    enabled: true
+    path: /metrics
