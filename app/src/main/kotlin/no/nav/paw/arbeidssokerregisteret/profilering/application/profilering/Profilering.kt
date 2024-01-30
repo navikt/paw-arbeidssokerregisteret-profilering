@@ -1,11 +1,10 @@
 package no.nav.paw.arbeidssokerregisteret.profilering.application.profilering
 
-import no.nav.paw.arbeidssokerregisteret.api.v1.OpplysningerOmArbeidssoeker
+import no.nav.paw.arbeidssokerregisteret.api.v2.OpplysningerOmArbeidssoeker
 import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
 import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
 import no.nav.paw.arbeidssokerregisteret.profilering.application.profilering.ProfileringsTagger.*
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfo
-import java.time.Duration
 import java.time.Period
 import java.time.ZoneId
 
@@ -14,12 +13,19 @@ fun profiler(
     opplysninger: OpplysningerOmArbeidssoeker
 ): Profilering {
     val sendtInnTidspunkt = opplysninger.sendtInnAv.tidspunkt
+    val sendtInnDato = sendtInnTidspunkt.atZone(ZoneId.systemDefault()).toLocalDate()
     val alder = alderVedTidspunkt(sendtInnTidspunkt, personInfo)
     val evalueringer =
         evaluerAnnet(opplysninger.annet) +
                 evaluerAlder(alder) +
                 evaluerHelse(opplysninger.helse) +
-                evaluerUtdanning(opplysninger.utdanning)
+                evaluerUtdanning(opplysninger.utdanning) +
+                evaluerArbeidsErfaring(
+                    3,
+                    Period.ofMonths(6),
+                    sendtInnDato.minusYears(1)..<sendtInnDato,
+                    personInfo.arbeidsforhold
+                )
 
     fun resultat(profilering: ProfilertTil) =
         profileringsResultat(

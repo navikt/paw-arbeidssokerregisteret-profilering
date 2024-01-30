@@ -13,9 +13,8 @@ import no.nav.paw.arbeidssokerregisteret.api.v1.Helse
 import no.nav.paw.arbeidssokerregisteret.api.v1.JaNeiVetIkke
 import no.nav.paw.arbeidssokerregisteret.api.v1.Jobbsituasjon
 import no.nav.paw.arbeidssokerregisteret.api.v1.Metadata
-import no.nav.paw.arbeidssokerregisteret.api.v1.OpplysningerOmArbeidssoeker
-import no.nav.paw.arbeidssokerregisteret.api.v1.Utdanning
-import no.nav.paw.arbeidssokerregisteret.api.v1.Utdanningsnivaa
+import no.nav.paw.arbeidssokerregisteret.api.v2.OpplysningerOmArbeidssoeker
+import no.nav.paw.arbeidssokerregisteret.api.v2.Utdanning
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfo
 import java.time.LocalDate
 import java.time.Month
@@ -66,7 +65,7 @@ object ProfileringTestData {
             "unit-test"
         ),
         /* utdanning = */ Utdanning(
-            Utdanningsnivaa.GRUNNSKOLE,
+            "3",
             JaNeiVetIkke.JA,
             JaNeiVetIkke.JA,
         ),
@@ -76,6 +75,6 @@ object ProfileringTestData {
         /* annet = */ Annet(JaNeiVetIkke.NEI)
     )
 
-    val standardOpplysningerOmArbeidssoekerBuilder =
+    fun standardOpplysningerOmArbeidssoekerBuilder(): OpplysningerOmArbeidssoeker.Builder =
         OpplysningerOmArbeidssoeker.newBuilder(standardOpplysningerOmArbeidssoeker)
 }

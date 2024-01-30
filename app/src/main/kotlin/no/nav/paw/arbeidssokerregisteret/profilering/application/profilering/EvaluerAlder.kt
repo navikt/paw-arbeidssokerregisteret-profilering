@@ -13,10 +13,8 @@ fun evaluerAlder(alder: Int?): Set<ProfileringsTagger> {
         else -> emptySet()
     }
 }
-
 fun alderVedTidspunkt(tidspunkt: Instant, personInfo: PersonInfo): Int? {
     val utgangspunkt = tidspunkt.atZone(ZoneId.systemDefault()).toLocalDate()
-    val dato = personInfo.foedselsdato
-        ?: personInfo.foedselsAar?.let { aar -> LocalDate.of(aar, 7, 1) }
-    return dato?.let { Period.between(it, utgangspunkt).years }
+    return personInfo.foedselsdato?.let { Period.between(it, utgangspunkt).years }
+        ?: personInfo.foedselsAar?.let { aar -> Period.between(LocalDate.of(aar, 7, 1), utgangspunkt).years }
 }

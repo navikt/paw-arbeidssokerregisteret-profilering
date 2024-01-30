@@ -2,7 +2,6 @@ package no.nav.paw.arbeidssokerregisteret.profilering.application.profilering
 
 import no.nav.paw.aareg.Arbeidsforhold
 import no.nav.paw.arbeidssokerregisteret.profilering.application.profilering.ProfileringsTagger.OPPFYLLER_KRAV_TIL_ARBEIDSERFARING
-import java.time.Duration
 import java.time.LocalDate
 import java.time.Period
 import java.time.temporal.ChronoUnit

@@ -4,7 +4,6 @@ import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
 import no.nav.paw.aareg.Ansettelsesperiode
 import no.nav.paw.aareg.Periode
-import java.time.Duration
 import java.time.LocalDate
 import java.time.Period
 
