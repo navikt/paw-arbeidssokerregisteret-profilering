@@ -33,8 +33,10 @@ fun lengsteSammenhengendeInnenforPeriode(
 ): SammhengendeJobb? =
     arbeidsforhold.flettSammenhengendeJobber(marginForSammenhengendeJobbDager)
         .filter { sammenhengendePeriode ->
-            sammenhengendePeriode.tid.contains(periode.start) ||
-            sammenhengendePeriode.tid.contains(periode.endExclusive)
+            (sammenhengendePeriode.tid.start <= periode.start &&
+                    sammenhengendePeriode.tid.endExclusive >= periode.start) ||
+                    (sammenhengendePeriode.tid.start <= periode.endExclusive &&
+                            sammenhengendePeriode.tid.endExclusive >= periode.endExclusive)
         }.maxByOrNull { it.periodeInnenfor(periode).length().days }
 
 fun SammhengendeJobb.periodeInnenfor(periode: OpenEndRange<LocalDate>): OpenEndRange<LocalDate> =
@@ -71,9 +73,14 @@ data class SammhengendeJobb(
     val tid: OpenEndRange<LocalDate>,
     val arbeidsforhold: List<Arbeidsforhold>
 ) {
-    private val tidMedMargin get() = tid.start.minus(marginInDays.toLong(), ChronoUnit.DAYS).rangeUntil(
-        if (tid.endExclusive == LocalDate.MAX) LocalDate.MAX else tid.endExclusive.plus(marginInDays.toLong(), ChronoUnit.DAYS)
-    )
+    private val tidMedMargin
+        get() = tid.start.minus(marginInDays.toLong(), ChronoUnit.DAYS).rangeUntil(
+            if (tid.endExclusive == LocalDate.MAX) LocalDate.MAX else tid.endExclusive.plus(
+                marginInDays.toLong(),
+                ChronoUnit.DAYS
+            )
+        )
+
     fun erDelAv(arbeidsforhold: Arbeidsforhold): Boolean {
         return tidMedMargin.contains(arbeidsforhold.ansettelsesperiode.periode.fom) ||
                 tidMedMargin.contains(arbeidsforhold.ansettelsesperiode.periode.tom ?: LocalDate.MAX)

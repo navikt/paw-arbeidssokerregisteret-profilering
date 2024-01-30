@@ -26,7 +26,8 @@ class EvaluerArbeidserfaringKtTest : StringSpec({
         result shouldBe setOf(ProfileringsTagger.OPPFYLLER_KRAV_TIL_ARBEIDSERFARING)
     }
 
-    "evaluerArbeidsErfaring skal returnere tomt set hvis kriteriene ikke er møtt" {
+    "evaluerArbeidsErfaring skal returnere ${setOf(ProfileringsTagger.OPPFYLLER_KRAV_TIL_ARBEIDSERFARING)} når vi har en " +
+            "jobbperiode som er lang nok og innenfor perioden" {
         val marginForSammenhengendeJobb = 3
         val minimumsArbeidserfaring = Period.ofMonths(6)
         val periode = LocalDate.now().minusMonths(12)..<LocalDate.now()
@@ -47,8 +48,9 @@ class EvaluerArbeidserfaringKtTest : StringSpec({
                 listOf(arbeidsforhold)
             )
 
-        result shouldBe emptySet()
+        result shouldBe setOf(ProfileringsTagger.OPPFYLLER_KRAV_TIL_ARBEIDSERFARING)
     }
+
     "evaluerArbeidsErfaring skal slå sammen to arbeidsforhold hvis de er innenfor marginen" {
         val marginForSammenhengendeJobb = 3
         val minimumsArbeidserfaring = Period.ofMonths(6)
