@@ -5,6 +5,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
 import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
+import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
 import no.nav.paw.arbeidssokerregisteret.api.v2.OpplysningerOmArbeidssoeker
 import no.nav.paw.arbeidssokerregisteret.profilering.application.APPLICATION_CONFIG_FILE
 import no.nav.paw.arbeidssokerregisteret.profilering.application.ApplicationConfiguration
@@ -69,8 +70,9 @@ class ApplicationTest : FreeSpec({
     )
     "profileringen skal skrives til output topic når det kommer en periode og opplysninger om arbeidssøker" {
         periodeTopic.pipeInput(5L, ProfileringTestData.periode)
-        opplysningerOmArbeidssoekerTopic.pipeInput(5L, ProfileringTestData.opplysningerOmArbeidssoeker)
+        opplysningerOmArbeidssoekerTopic.pipeInput(5L, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
         val outputProfilering = profileringsTopic.readValue()
         outputProfilering.periodeId shouldBe ProfileringTestData.profilering.periodeId
+        outputProfilering.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
     }
 })

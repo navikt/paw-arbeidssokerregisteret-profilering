@@ -59,7 +59,7 @@ object ProfileringTestData {
 
     val standardOpplysningerOmArbeidssoeker = OpplysningerOmArbeidssoeker(
         /* id = */ UUID.randomUUID(),
-        /* periodeId = */ UUID.randomUUID(),
+        /* periodeId = */ uuid,
         /* sendtInnAv = */ Metadata(
             today.atStartOfDay().toInstant(ZoneOffset.UTC),
             Bruker(
@@ -92,41 +92,10 @@ object ProfileringTestData {
         null
     )
 
-    val opplysningerOmArbeidssoeker = OpplysningerOmArbeidssoeker(
+    val profilering = Profilering(
         UUID.randomUUID(),
         uuid,
-        Metadata(
-            Instant.now(),
-            Bruker(
-                BrukerType.SYSTEM,
-                identitetsnummer
-            ),
-            "test",
-            "test"
-        ),
-        Utdanning(
-            "1",
-            JaNeiVetIkke.VET_IKKE,
-            JaNeiVetIkke.VET_IKKE
-        ),
-        Helse(
-            JaNeiVetIkke.VET_IKKE
-        ),
-        Arbeidserfaring(
-            JaNeiVetIkke.VET_IKKE
-        ),
-        Jobbsituasjon(
-            emptyList()
-        ),
-        Annet(
-            JaNeiVetIkke.VET_IKKE
-        )
-    )
-
-    val profilering = Profilering(
-        uuid,
-        uuid,
-        uuid,
+        standardOpplysningerOmArbeidssoeker.id,
         Metadata(
             Instant.now(),
             Bruker(
