@@ -13,9 +13,12 @@ import no.nav.paw.arbeidssokerregisteret.api.v1.Helse
 import no.nav.paw.arbeidssokerregisteret.api.v1.JaNeiVetIkke
 import no.nav.paw.arbeidssokerregisteret.api.v1.Jobbsituasjon
 import no.nav.paw.arbeidssokerregisteret.api.v1.Metadata
+import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
+import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
 import no.nav.paw.arbeidssokerregisteret.api.v2.OpplysningerOmArbeidssoeker
 import no.nav.paw.arbeidssokerregisteret.api.v2.Utdanning
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfo
+import java.time.Instant
 import java.time.LocalDate
 import java.time.Month
 import java.time.ZoneOffset
@@ -24,6 +27,7 @@ import java.util.*
 object ProfileringTestData {
     private val today = LocalDate.now()
     const val organisasjonsNummer = "123456789"
+    private val uuid = UUID.randomUUID()
 
     val arbeidsforhold = Arbeidsforhold(
         arbeidsgiver = Arbeidsgiver(
@@ -73,6 +77,67 @@ object ProfileringTestData {
         /* arbeidserfaring = */ Arbeidserfaring(JaNeiVetIkke.JA),
         /* jobbsituasjon = */ Jobbsituasjon(emptyList()),
         /* annet = */ Annet(JaNeiVetIkke.NEI)
+    )
+
+    val periode = no.nav.paw.arbeidssokerregisteret.api.v1.Periode(
+        uuid,
+        "123456789",
+        Metadata(
+            Instant.now(),
+            Bruker(BrukerType.SYSTEM, "2"),
+            "NY_KILDE",
+            "NY_AARSAK"
+        ),
+        null
+    )
+
+    val opplysningerOmArbeidssoeker = OpplysningerOmArbeidssoeker(
+        UUID.randomUUID(),
+        uuid,
+        Metadata(
+            Instant.now(),
+            Bruker(
+                BrukerType.SYSTEM,
+                "12345678911"
+            ),
+            "test",
+            "test"
+        ),
+        Utdanning(
+            "NUS_KODE",
+            JaNeiVetIkke.VET_IKKE,
+            JaNeiVetIkke.VET_IKKE
+        ),
+        Helse(
+            JaNeiVetIkke.VET_IKKE
+        ),
+        Arbeidserfaring(
+            JaNeiVetIkke.VET_IKKE
+        ),
+        Jobbsituasjon(
+            emptyList()
+        ),
+        Annet(
+            JaNeiVetIkke.VET_IKKE
+        )
+    )
+
+    val profilering = Profilering(
+        uuid,
+        uuid,
+        uuid,
+        Metadata(
+            Instant.now(),
+            Bruker(
+                BrukerType.SYSTEM,
+                "12345678911"
+            ),
+            "test",
+            "test"
+        ),
+        ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING,
+        false,
+        20
     )
 
     fun standardOpplysningerOmArbeidssoekerBuilder(): OpplysningerOmArbeidssoeker.Builder =

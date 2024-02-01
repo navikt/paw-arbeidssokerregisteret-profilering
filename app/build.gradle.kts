@@ -14,6 +14,7 @@ val logbackVersion = "1.4.12"
 val pawUtilsVersion = "24.01.11.9-1"
 val pawPdlClientsVersion = "24.01.12.26-1"
 val pawAaRegClientVersion = "24.01.12.16-1"
+val kafkaStreamsVersion = "3.6.0"
 
 val schema by configurations.creating {
     isTransitive = false
@@ -47,14 +48,16 @@ dependencies {
     implementation("io.confluent:kafka-avro-serializer:7.5.3")
     implementation("io.confluent:kafka-streams-avro-serde:7.5.3")
     implementation("org.apache.avro:avro:1.11.3")
-    implementation("org.apache.kafka:kafka-clients:3.6.0")
-    implementation("org.apache.kafka:kafka-streams:3.6.0")
+    implementation("org.apache.kafka:kafka-clients:$kafkaStreamsVersion")
+    implementation("org.apache.kafka:kafka-streams:$kafkaStreamsVersion")
 
     // Use the Kotlin JUnit 5 integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 
-    //kotest
+    // kotest
     testImplementation("io.kotest:kotest-runner-junit5-jvm:5.8.0")
+
+    testImplementation("org.apache.kafka:kafka-streams-test-utils:$kafkaStreamsVersion")
 
     // Use the JUnit 5 integration.
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.9.3")
