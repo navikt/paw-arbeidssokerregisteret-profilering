@@ -16,7 +16,7 @@ fun applicationTopology(
     val periodeTabell = streamBuilder
         .stream<Long, Periode>(applicationConfiguration.periodeTopic)
         .conditionallySuppress(suppressionConfig)
-        .mapValues { _, periode -> if (periode.avsluttet != null) periode else null }
+        .mapValues { _, periode -> if (periode.avsluttet == null) periode else null }
         .toTable()
 
     streamBuilder

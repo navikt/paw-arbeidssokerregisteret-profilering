@@ -34,5 +34,5 @@ fun profileringsResultat(
 
 val bruker = Bruker(
     BrukerType.SYSTEM,
-    ApplicationInfo.name
+    ApplicationInfo.id
 )

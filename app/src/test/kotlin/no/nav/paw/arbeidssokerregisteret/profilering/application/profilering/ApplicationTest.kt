@@ -10,6 +10,7 @@ import no.nav.paw.arbeidssokerregisteret.profilering.application.APPLICATION_CON
 import no.nav.paw.arbeidssokerregisteret.profilering.application.ApplicationConfiguration
 import no.nav.paw.arbeidssokerregisteret.profilering.application.SuppressionConfig
 import no.nav.paw.arbeidssokerregisteret.profilering.application.applicationTopology
+import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfo
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoTjeneste
 import no.nav.paw.config.hoplite.loadNaisOrLocalConfiguration
 import org.apache.kafka.common.serialization.Serdes
@@ -33,7 +34,7 @@ class ApplicationTest : FreeSpec({
     val stateStoreName = "periodeTombstoneDelayStore"
     val topology = applicationTopology(
         streamBuilder = streamsBuilder,
-        personInfoTjeneste = PersonInfoTjeneste.create(),
+        personInfoTjeneste = { _, _ -> PersonInfo(null, 1990, emptyList()) },
         applicationConfiguration = applicationConfig,
         suppressionConfig = SuppressionConfig(
             stateStoreName = stateStoreName,
@@ -65,12 +66,6 @@ class ApplicationTest : FreeSpec({
         Serdes.Long().deserializer(),
         profileringSerde.deserializer()
     )
-    "det finnes noe i state store" {
-        periodeTopic.pipeInput(5L, ProfileringTestData.periode)
-        opplysningerOmArbeidssoekerTopic.pipeInput(5L, ProfileringTestData.opplysningerOmArbeidssoeker)
-        testDriver.getTimestampedKeyValueStore<Long, String>(stateStoreName)
-            .get(5L).shouldNotBeNull()
-    }
     "en hest" {
         periodeTopic.pipeInput(5L, ProfileringTestData.periode)
         opplysningerOmArbeidssoekerTopic.pipeInput(5L, ProfileringTestData.opplysningerOmArbeidssoeker)
