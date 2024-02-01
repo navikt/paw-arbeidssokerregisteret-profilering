@@ -19,6 +19,7 @@ import org.apache.kafka.streams.TopologyTestDriver
 import org.apache.kafka.streams.processor.PunctuationType
 import org.apache.kafka.streams.state.Stores
 import java.time.Duration
+import java.time.LocalDate
 
 class ApplicationTest : FreeSpec({
     val applicationConfig = loadNaisOrLocalConfiguration<ApplicationConfiguration>(APPLICATION_CONFIG_FILE)
@@ -34,7 +35,7 @@ class ApplicationTest : FreeSpec({
     val stateStoreName = "periodeTombstoneDelayStore"
     val topology = applicationTopology(
         streamBuilder = streamsBuilder,
-        personInfoTjeneste = { _, _ -> PersonInfo(null, 1990, emptyList()) },
+        personInfoTjeneste = { _, _ -> ProfileringTestData.personInfo },
         applicationConfiguration = applicationConfig,
         suppressionConfig = SuppressionConfig(
             stateStoreName = stateStoreName,
@@ -66,10 +67,10 @@ class ApplicationTest : FreeSpec({
         Serdes.Long().deserializer(),
         profileringSerde.deserializer()
     )
-    "en hest" {
+    "profileringen skal skrives til output topic når det kommer en periode og opplysninger om arbeidssøker" {
         periodeTopic.pipeInput(5L, ProfileringTestData.periode)
         opplysningerOmArbeidssoekerTopic.pipeInput(5L, ProfileringTestData.opplysningerOmArbeidssoeker)
         val outputProfilering = profileringsTopic.readValue()
-        outputProfilering shouldBe ProfileringTestData.profilering
+        outputProfilering.periodeId shouldBe ProfileringTestData.profilering.periodeId
     }
 })

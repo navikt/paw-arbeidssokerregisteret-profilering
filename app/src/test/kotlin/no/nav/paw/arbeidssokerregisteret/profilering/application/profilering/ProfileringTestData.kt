@@ -27,6 +27,7 @@ import java.util.*
 object ProfileringTestData {
     private val today = LocalDate.now()
     const val organisasjonsNummer = "123456789"
+    const val identitetsnummer = "12345678911"
     private val uuid = UUID.randomUUID()
 
     val arbeidsforhold = Arbeidsforhold(
@@ -81,12 +82,12 @@ object ProfileringTestData {
 
     val periode = no.nav.paw.arbeidssokerregisteret.api.v1.Periode(
         uuid,
-        "123456789",
+        identitetsnummer,
         Metadata(
             Instant.now(),
-            Bruker(BrukerType.SYSTEM, "2"),
-            "NY_KILDE",
-            "NY_AARSAK"
+            Bruker(BrukerType.SYSTEM, identitetsnummer),
+            "test",
+            "test"
         ),
         null
     )
@@ -98,13 +99,13 @@ object ProfileringTestData {
             Instant.now(),
             Bruker(
                 BrukerType.SYSTEM,
-                "12345678911"
+                identitetsnummer
             ),
             "test",
             "test"
         ),
         Utdanning(
-            "NUS_KODE",
+            "1",
             JaNeiVetIkke.VET_IKKE,
             JaNeiVetIkke.VET_IKKE
         ),
@@ -130,7 +131,7 @@ object ProfileringTestData {
             Instant.now(),
             Bruker(
                 BrukerType.SYSTEM,
-                "12345678911"
+                identitetsnummer
             ),
             "test",
             "test"
@@ -139,6 +140,8 @@ object ProfileringTestData {
         false,
         20
     )
+
+    val personInfo = PersonInfo(LocalDate.of(1986, 11,26), 1990, listOf(arbeidsforhold))
 
     fun standardOpplysningerOmArbeidssoekerBuilder(): OpplysningerOmArbeidssoeker.Builder =
         OpplysningerOmArbeidssoeker.newBuilder(standardOpplysningerOmArbeidssoeker)
