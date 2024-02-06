@@ -17,6 +17,8 @@ jobs:
       image: ${{ steps.docker-build-push.outputs.image }}
     steps:
       - uses: actions/checkout@v4
+      - name: Set version
+        run: echo "VERSION=$(date +'%y.%m.%d').${{ github.run_number }}-${{ github.run_attempt }}" >> $GITHUB_ENV
       - uses: actions/setup-java@v4
         with:
           java-version: 21
@@ -26,7 +28,7 @@ jobs:
         env:
           ORG_GRADLE_PROJECT_githubPassword: ${{ secrets.GITHUB_TOKEN }}
         with:
-          arguments: build
+          arguments: build -Pversion=${{ env.VERSION }}
       - name: Push docker image to GAR
         uses: nais/docker-build-push@v0
         id: docker-build-push

@@ -1,2 +1,2 @@
 tokenEndpointUrl = "http://localhost:8081/default/token"
-clientId = "paw-migrering-veilarb-til-nytt-register"
+clientId = "paw-arbeidssokerregisteret-profilering"
