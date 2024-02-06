@@ -1,7 +1,6 @@
 package no.nav.paw.arbeidssokerregisteret.profilering.application.profilering
 
 import io.kotest.core.spec.style.FreeSpec
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
 import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
@@ -11,8 +10,6 @@ import no.nav.paw.arbeidssokerregisteret.profilering.application.APPLICATION_CON
 import no.nav.paw.arbeidssokerregisteret.profilering.application.ApplicationConfiguration
 import no.nav.paw.arbeidssokerregisteret.profilering.application.SuppressionConfig
 import no.nav.paw.arbeidssokerregisteret.profilering.application.applicationTopology
-import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfo
-import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoTjeneste
 import no.nav.paw.config.hoplite.loadNaisOrLocalConfiguration
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.StreamsBuilder
@@ -20,7 +17,6 @@ import org.apache.kafka.streams.TopologyTestDriver
 import org.apache.kafka.streams.processor.PunctuationType
 import org.apache.kafka.streams.state.Stores
 import java.time.Duration
-import java.time.LocalDate
 
 class ApplicationTest : FreeSpec({
     val applicationConfig = loadNaisOrLocalConfiguration<ApplicationConfiguration>(APPLICATION_CONFIG_FILE)

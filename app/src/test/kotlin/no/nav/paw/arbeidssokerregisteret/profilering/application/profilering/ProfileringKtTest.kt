@@ -21,11 +21,11 @@ class ProfileringKtTest : FreeSpec({
         ).profilertTil shouldBe ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
     }
     "En med alder på 17 år skal gi ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING}" {
-        val SyttenAarSiden = LocalDate.now().minusYears(17)
+        val syttenAarSiden = LocalDate.now().minusYears(17)
         profiler(
             ProfileringTestData.standardBrukerPersonInfo.copy(
-                foedselsdato = SyttenAarSiden,
-                foedselsAar = SyttenAarSiden.year
+                foedselsdato = syttenAarSiden,
+                foedselsAar = syttenAarSiden.year
             ),
             opplysninger = ProfileringTestData.standardOpplysningerOmArbeidssoeker
         ).profilertTil shouldBe ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
