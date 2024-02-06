@@ -54,8 +54,8 @@ fun main() {
         ) { _, value -> value.avsluttet != null }
     )
     val streamsConfig = KafkaStreamsFactory(applicationConfig.applicationIdSuffix, kafkaConfig)
-        .withDefaultKeySerde(SpecificAvroSerde::class)
         .withDefaultKeySerde(LongSerde::class)
+        .withDefaultValueSerde(SpecificAvroSerde::class)
     val kafkaStreams = KafkaStreams(topology, streamsConfig.properties)
 
     kafkaStreams.setUncaughtExceptionHandler { throwable ->
