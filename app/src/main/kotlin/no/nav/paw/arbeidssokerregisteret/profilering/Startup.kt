@@ -57,16 +57,22 @@ fun main() {
         .withDefaultKeySerde(SpecificAvroSerde::class)
         .withDefaultKeySerde(LongSerde::class)
     val kafkaStreams = KafkaStreams(topology, streamsConfig.properties)
-    val health = Health(kafkaStreams)
+
     kafkaStreams.setUncaughtExceptionHandler { throwable ->
         logger.error("Uventet feil", throwable)
         StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.SHUTDOWN_APPLICATION
     }
+
+    kafkaStreams.start()
+
+    val health = Health(kafkaStreams)
+
     initKtor(
         kafkaStreamsMetrics = KafkaStreamsMetrics(kafkaStreams),
         prometheusRegistry = prometheusMeterRegistry,
         health = health
     ).start(wait = true)
-    logger.info("konfigurasjon lastet og avhengigheter opprettet")
+
+    logger.info("Applikasjon startet")
 }
 
