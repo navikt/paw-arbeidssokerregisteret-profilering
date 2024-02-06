@@ -38,6 +38,9 @@ jobs:
   deploy-dev:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/dev')
     name: Deploy to dev-gcp
+    permissions:
+      contents: read
+      id-token: write
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -51,6 +54,9 @@ jobs:
   deploy-prod:
     if: github.ref == 'refs/heads/main'
     name: Deploy to prod-gcp
+    permissions:
+      contents: read
+      id-token: write
     needs: [build]
     runs-on: ubuntu-latest
     steps:
