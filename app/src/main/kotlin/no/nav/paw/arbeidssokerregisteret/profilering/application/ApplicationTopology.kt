@@ -6,6 +6,7 @@ import no.nav.paw.arbeidssokerregisteret.profilering.application.profilering.pro
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoTjeneste
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
+import org.slf4j.LoggerFactory
 
 fun applicationTopology(
     suppressionConfig: SuppressionConfig<Long, Periode>,
@@ -13,6 +14,7 @@ fun applicationTopology(
     personInfoTjeneste: PersonInfoTjeneste,
     applicationConfiguration: ApplicationConfiguration
 ): Topology {
+    val logger = LoggerFactory.getLogger("applicationTopology")
     val periodeTabell = streamBuilder
         .stream<Long, Periode>(applicationConfiguration.periodeTopic)
         .conditionallySuppress(suppressionConfig)
@@ -21,11 +23,14 @@ fun applicationTopology(
 
     streamBuilder
         .stream<Long, OpplysningerOmArbeidssoeker>(applicationConfiguration.opplysningerTopic)
+        .peek { _, opplysninger -> logger.info("Opplysninger id (prejoin): ${opplysninger.id}") }
         .join(periodeTabell) { opplysninger, periode ->
             periode?.identitetsnummer?.let { identitetsnummer ->
                 identitetsnummer to opplysninger
             }
-        }.mapValues { _, (identitetsnummer, opplysninger) ->
+        }
+        .peek { _, v -> logger.info("Opplysninger id (postjoin): ${v.second.id}") }
+        .mapValues { _, (identitetsnummer, opplysninger) ->
             val personInfo = personInfoTjeneste.hentPersonInfo(identitetsnummer, opplysninger.id)
             personInfo to opplysninger
         }.mapValues { _, (personInfo, opplysninger) ->

@@ -11,8 +11,8 @@ spec:
       enabled: true
   image: {{ image }}
   replicas:
-    min: 0
-    max: 0
+    min: 1
+    max: 1
   resources:
     limits:
       cpu: 3500m
@@ -33,7 +33,7 @@ spec:
     - name: OTEL_JAVAAGENT_DEBUG
       value: "false"
     - name: AAREG_URL
-      value: https://aareg-services-q1.prod-fss-pub.nais.io/api/v1/arbeidstaker/arbeidsforhold
+      value: https://aareg-services.prod-fss-pub.nais.io/api/v1/arbeidstaker/arbeidsforhold
     - name: AAREG_SCOPE
       value: api://prod-fss.aareg.aareg-api/.default
     - name: PDL_URL
