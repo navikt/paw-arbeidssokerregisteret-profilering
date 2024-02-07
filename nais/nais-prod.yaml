@@ -22,6 +22,7 @@ spec:
       memory: 200Mi
   kafka:
     pool: nav-prod
+    streams: true
   observability:
     tracing:
       enabled: true
