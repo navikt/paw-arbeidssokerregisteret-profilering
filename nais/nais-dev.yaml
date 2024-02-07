@@ -36,7 +36,7 @@ spec:
     - name: AAREG_URL
       value: https://aareg-services-q1.dev-fss-pub.nais.io/api/v1/arbeidstaker/arbeidsforhold
     - name: AAREG_SCOPE
-      value: api://dev-fss.aareg.aareg-api/.default
+      value: api://dev-fss.arbeidsforhold.aareg-services-nais-q1/.default
     - name: PDL_URL
       value: https://pdl-api.dev-fss-pub.nais.io/graphql
     - name: PDL_SCOPE
