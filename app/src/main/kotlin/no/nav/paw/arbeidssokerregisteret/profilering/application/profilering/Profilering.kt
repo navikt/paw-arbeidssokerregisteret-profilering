@@ -1,6 +1,6 @@
 package no.nav.paw.arbeidssokerregisteret.profilering.application.profilering
 
-import no.nav.paw.arbeidssokerregisteret.api.v2.OpplysningerOmArbeidssoeker
+import no.nav.paw.arbeidssokerregisteret.api.v3.OpplysningerOmArbeidssoeker
 import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
 import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
 import no.nav.paw.arbeidssokerregisteret.profilering.application.profilering.ProfileringsTagger.*

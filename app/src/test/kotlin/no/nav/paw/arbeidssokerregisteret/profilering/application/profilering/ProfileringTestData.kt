@@ -15,8 +15,8 @@ import no.nav.paw.arbeidssokerregisteret.api.v1.Jobbsituasjon
 import no.nav.paw.arbeidssokerregisteret.api.v1.Metadata
 import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
 import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
-import no.nav.paw.arbeidssokerregisteret.api.v2.OpplysningerOmArbeidssoeker
-import no.nav.paw.arbeidssokerregisteret.api.v2.Utdanning
+import no.nav.paw.arbeidssokerregisteret.api.v3.OpplysningerOmArbeidssoeker
+import no.nav.paw.arbeidssokerregisteret.api.v3.Utdanning
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfo
 import java.time.Instant
 import java.time.LocalDate

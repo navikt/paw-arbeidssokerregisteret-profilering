@@ -6,7 +6,7 @@ import no.nav.paw.arbeidssokerregisteret.api.v1.Annet
 import no.nav.paw.arbeidssokerregisteret.api.v1.Helse
 import no.nav.paw.arbeidssokerregisteret.api.v1.JaNeiVetIkke
 import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
-import no.nav.paw.arbeidssokerregisteret.api.v2.Utdanning
+import no.nav.paw.arbeidssokerregisteret.api.v3.Utdanning
 import java.time.LocalDate
 
 class ProfileringKtTest : FreeSpec({

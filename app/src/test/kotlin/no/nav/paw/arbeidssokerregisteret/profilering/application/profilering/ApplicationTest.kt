@@ -5,7 +5,7 @@ import io.kotest.matchers.shouldBe
 import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
 import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
 import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
-import no.nav.paw.arbeidssokerregisteret.api.v2.OpplysningerOmArbeidssoeker
+import no.nav.paw.arbeidssokerregisteret.api.v3.OpplysningerOmArbeidssoeker
 import no.nav.paw.arbeidssokerregisteret.profilering.application.APPLICATION_CONFIG_FILE
 import no.nav.paw.arbeidssokerregisteret.profilering.application.ApplicationConfiguration
 import no.nav.paw.arbeidssokerregisteret.profilering.application.SuppressionConfig
