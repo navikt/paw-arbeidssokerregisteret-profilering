@@ -35,7 +35,7 @@ fun main() {
         .addStateStore(
             Stores.timestampedKeyValueStoreBuilder(
                 Stores.persistentKeyValueStore("periodeTombstoneDelayStore"),
-                Serdes.String(),
+                Serdes.Long(),
                 Serdes.String()
             )
         )
