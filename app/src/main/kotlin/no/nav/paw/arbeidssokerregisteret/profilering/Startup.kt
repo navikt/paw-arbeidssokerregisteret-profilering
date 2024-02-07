@@ -31,15 +31,18 @@ fun main() {
     logger.info("Starter: {}", ApplicationInfo.id)
     val prometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
     val kafkaConfig = loadNaisOrLocalConfiguration<KafkaConfig>(KAFKA_CONFIG_WITH_SCHEME_REG)
+    val applicationConfig = loadNaisOrLocalConfiguration<ApplicationConfiguration>(APPLICATION_CONFIG_FILE)
+    val streamsConfig = KafkaStreamsFactory(applicationConfig.applicationIdSuffix, kafkaConfig)
+        .withDefaultKeySerde(LongSerde::class)
+        .withDefaultValueSerde(SpecificAvroSerde::class)
     val streamsBuilder = StreamsBuilder()
         .addStateStore(
             Stores.timestampedKeyValueStoreBuilder(
                 Stores.persistentKeyValueStore("periodeTombstoneDelayStore"),
                 Serdes.Long(),
-                Serdes.String()
+                streamsConfig.createSpecificAvroSerde()
             )
         )
-    val applicationConfig = loadNaisOrLocalConfiguration<ApplicationConfiguration>(APPLICATION_CONFIG_FILE)
 
     val topology = applicationTopology(
         streamBuilder = streamsBuilder,
@@ -53,9 +56,7 @@ fun main() {
             suppressDurationType = SuppressionConfig.Type.ANY
         ) { _, value -> value.avsluttet != null }
     )
-    val streamsConfig = KafkaStreamsFactory(applicationConfig.applicationIdSuffix, kafkaConfig)
-        .withDefaultKeySerde(LongSerde::class)
-        .withDefaultValueSerde(SpecificAvroSerde::class)
+
     val kafkaStreams = KafkaStreams(topology, streamsConfig.properties)
 
     kafkaStreams.setUncaughtExceptionHandler { throwable ->
