@@ -23,13 +23,13 @@ fun applicationTopology(
 
     streamBuilder
         .stream<Long, OpplysningerOmArbeidssoeker>(applicationConfiguration.opplysningerTopic)
-        .peek { _, opplysninger -> logger.info("Opplysninger id (prejoin): ${opplysninger.id}") }
+        .peek { _, opplysninger -> logger.trace("Opplysninger id (prejoin): {}", opplysninger.id) }
         .join(periodeTabell) { opplysninger, periode ->
             periode?.identitetsnummer?.let { identitetsnummer ->
                 identitetsnummer to opplysninger
             }
         }
-        .peek { _, v -> logger.info("Opplysninger id (postjoin): ${v.second.id}") }
+        .peek { _, v -> logger.trace("Opplysninger id (postjoin): {}", v.second.id) }
         .mapValues { _, (identitetsnummer, opplysninger) ->
             val personInfo = personInfoTjeneste.hentPersonInfo(identitetsnummer, opplysninger.id)
             personInfo to opplysninger
