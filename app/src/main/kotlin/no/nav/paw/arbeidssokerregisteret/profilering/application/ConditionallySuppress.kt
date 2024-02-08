@@ -48,7 +48,7 @@ class ConditionallySuppress<K, V>(
                             SuppressionConfig.Type.ANY -> wallTimePassed() || streamTimePassed()
                         }
                     }.onEach { kv ->
-                        ctx.forward(Record(kv.key, kv.value.value(), ctx.currentStreamTimeMs()))
+                        ctx.forward(Record(kv.key, kv.value.value(), kv.value.timestamp()))
                     }.forEach { kv ->
                         stateStore.delete(kv.key)
                     }
