@@ -8,6 +8,7 @@ import org.apache.kafka.streams.processor.api.Record
 import org.apache.kafka.streams.state.TimestampedKeyValueStore
 import org.apache.kafka.streams.state.ValueAndTimestamp
 import java.time.Duration
+import kotlin.math.max
 
 fun <K, V> KStream<K, V>.conditionallySuppress(
     suppressionConfig: SuppressionConfig<K, V>
@@ -48,7 +49,8 @@ class ConditionallySuppress<K, V>(
                             SuppressionConfig.Type.ANY -> wallTimePassed() || streamTimePassed()
                         }
                     }.onEach { kv ->
-                        ctx.forward(Record(kv.key, kv.value.value(), kv.value.timestamp()))
+                        val timstamp = max(1L, ctx.currentStreamTimeMs())
+                        ctx.forward(Record(kv.key, kv.value.value(), timstamp))
                     }.forEach { kv ->
                         stateStore.delete(kv.key)
                     }
