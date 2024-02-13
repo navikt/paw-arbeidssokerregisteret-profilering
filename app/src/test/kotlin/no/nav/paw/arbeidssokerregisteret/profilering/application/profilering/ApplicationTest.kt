@@ -117,4 +117,18 @@ class ApplicationTest : FreeSpec({
         )
         profileringsTopic.isEmpty shouldBe true
     }
+    "to profileringer skal skrives til output topic når det kommer to opplysninger innenfor periode" {
+        periodeTopic.pipeInput(6L, ProfileringTestData.periode)
+        opplysningerOmArbeidssoekerTopic.pipeInput(6L, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
+        opplysningerOmArbeidssoekerTopic.pipeInput(6L, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
+
+        val outputProfilering1 = profileringsTopic.readValue()
+        outputProfilering1.periodeId shouldBe ProfileringTestData.profilering.periodeId
+        outputProfilering1.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
+        periodeTopic.pipeInput(7L, ProfileringTestData.periode)
+        opplysningerOmArbeidssoekerTopic.pipeInput(7L, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
+        val outputProfilering2 = profileringsTopic.readValue()
+        outputProfilering2.periodeId shouldBe ProfileringTestData.profilering.periodeId
+        outputProfilering2.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
+    }
 })
