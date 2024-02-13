@@ -1,7 +1,6 @@
 package no.nav.paw.arbeidssokerregisteret.profilering.application
 
 import no.nav.paw.arbeidssokerregisteret.api.helpers.v3.TopicsJoin
-import org.apache.avro.specific.SpecificRecord
 import org.apache.kafka.streams.kstream.KStream
 import org.apache.kafka.streams.kstream.Named
 import org.apache.kafka.streams.processor.PunctuationType
@@ -48,13 +47,13 @@ sealed class BaseStateStoreSave(
         ctx: ProcessorContext<Long, TopicsJoin>,
         stateStore: KeyValueStore<String, TopicsJoin>
     ) {
-        ctx.schedule(Duration.ofMinutes(10), PunctuationType.STREAM_TIME) { tid ->
-            val gjeldeneTidspunkt = Instant.ofEpochMilli(tid)
+        ctx.schedule(Duration.ofMinutes(10), PunctuationType.STREAM_TIME) { time ->
+            val currentTime = Instant.ofEpochMilli(time)
             stateStore.all().use { iterator ->
                 iterator.forEach { keyValue ->
                     val compositeKey = keyValue.key
                     val value = keyValue.value
-                    if (value.isOutdated(currentTime = gjeldeneTidspunkt)) {
+                    if (value.isOutdated(currentTime = currentTime)) {
                         stateStore.delete(compositeKey)
                     }
                 }
@@ -69,7 +68,7 @@ sealed class BaseStateStoreSave(
         val compositeKey = compositeKey(record.key(), record.value().periodeId())
         val currentValue = store.get(compositeKey)
         val newValue = record.value() mergeTo currentValue
-        if (newValue.harPeriodeOgOpplysninger()) {
+        if (newValue.isComplete()) {
             ctx.forward(record.withValue(newValue))
             // Vi kan få flere opplysninger på samme periode, så vi beholder den.
             store.put(compositeKey, TopicsJoin(newValue.periode, null, null))
@@ -80,33 +79,6 @@ sealed class BaseStateStoreSave(
 }
 
 fun compositeKey(orginalKey: Long, periodeId: UUID) = "$orginalKey:${periodeId}"
-infix fun TopicsJoin.mergeTo(existingData: TopicsJoin?): TopicsJoin =
-    TopicsJoin(
-        periode ?: existingData?.periode,
-        profilering ?: existingData?.profilering,
-        opplysningerOmArbeidssoeker ?: existingData?.opplysningerOmArbeidssoeker
-    )
-fun TopicsJoin.isOutdated(
-    currentTime: Instant,
-    maxAgeForCompletedPeriode: Duration = Duration.ofHours(1),
-    maxAgeForStandaloneOpplysning: Duration = Duration.ofHours(1)
-): Boolean {
-    return periode?.avsluttet?.tidspunkt?.let { completedEnd ->
-        between(completedEnd, currentTime).abs() > maxAgeForCompletedPeriode
-    } ?: (periode == null &&
-            opplysningerOmArbeidssoeker?.sendtInnAv?.tidspunkt?.let { standaloneTimestamp ->
-                between(standaloneTimestamp, currentTime).abs() > maxAgeForStandaloneOpplysning
-            } ?: true)
-}
-
-fun TopicsJoin.periodeId(): UUID =
-    periode?.id
-        ?: opplysningerOmArbeidssoeker?.periodeId
-        ?: profilering?.periodeId
-        ?: throw IllegalStateException("Minst et felt i TopicsJoin må være satt!")
-
-fun TopicsJoin.harPeriodeOgOpplysninger(): Boolean =
-    periode != null && opplysningerOmArbeidssoeker != null
 
 class OpplysningerOmArbeidssoekerStateStoreSave(
     stateStoreName: String

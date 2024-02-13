@@ -6,6 +6,5 @@ data class ApplicationConfiguration(
     val opplysningerTopic: String,
     val profileringTopic: String,
     val applicationIdSuffix: String,
-    val periodeStateStoreName: String,
-    val opplysningerStateStoreName: String
+    val joiningStateStoreName: String
 )

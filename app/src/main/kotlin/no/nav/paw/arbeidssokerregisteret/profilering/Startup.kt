@@ -36,14 +36,7 @@ fun main() {
     val streamsBuilder = StreamsBuilder()
         .addStateStore(
             Stores.keyValueStoreBuilder(
-                Stores.persistentKeyValueStore(applicationConfig.periodeStateStoreName),
-                Serdes.String(),
-                streamsConfig.createSpecificAvroSerde()
-            )
-        )
-        .addStateStore(
-            Stores.keyValueStoreBuilder(
-                Stores.persistentKeyValueStore(applicationConfig.opplysningerStateStoreName),
+                Stores.persistentKeyValueStore(applicationConfig.joiningStateStoreName),
                 Serdes.String(),
                 streamsConfig.createSpecificAvroSerde()
             )

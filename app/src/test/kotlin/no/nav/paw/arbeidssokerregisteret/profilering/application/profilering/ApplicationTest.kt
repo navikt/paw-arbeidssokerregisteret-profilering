@@ -1,6 +1,5 @@
 package no.nav.paw.arbeidssokerregisteret.profilering.application.profilering
 
-import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
 import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
@@ -21,14 +20,7 @@ class ApplicationTest : FreeSpec({
     val streamsBuilder = StreamsBuilder()
         .addStateStore(
             Stores.keyValueStoreBuilder(
-                Stores.persistentKeyValueStore(applicationConfig.periodeStateStoreName),
-                Serdes.String(),
-                createAvroSerde()
-            )
-        )
-        .addStateStore(
-            Stores.keyValueStoreBuilder(
-                Stores.persistentKeyValueStore(applicationConfig.opplysningerStateStoreName),
+                Stores.persistentKeyValueStore(applicationConfig.joiningStateStoreName),
                 Serdes.String(),
                 createAvroSerde()
             )

@@ -18,12 +18,15 @@ fun applicationTopology(
     streamBuilder
         .stream<Long, Periode>(applicationConfiguration.periodeTopic)
         .mapValues { _, periode -> TopicsJoin(periode, null, null) }
-        .saveAndForwardIfComplete(PeriodeStateStoreSave::class, applicationConfiguration.periodeStateStoreName)
+        .saveAndForwardIfComplete(PeriodeStateStoreSave::class, applicationConfiguration.joiningStateStoreName)
 
     streamBuilder
         .stream<Long, OpplysningerOmArbeidssoeker>(applicationConfiguration.opplysningerTopic)
         .mapValues { _, opplysninger -> TopicsJoin(null, null, opplysninger) }
-        .saveAndForwardIfComplete(OpplysningerOmArbeidssoekerStateStoreSave::class, applicationConfiguration.opplysningerStateStoreName)
+        .saveAndForwardIfComplete(
+            OpplysningerOmArbeidssoekerStateStoreSave::class,
+            applicationConfiguration.joiningStateStoreName
+        )
         .filter { key, topicsJoins ->
             topicsJoins.isComplete().also { complete ->
                 if (!complete) {
@@ -39,11 +42,7 @@ fun applicationTopology(
             val personInfo = personInfoTjeneste.hentPersonInfo(periode.identitetsnummer, opplysninger.id)
             personInfo to opplysninger
         }
-        .mapValues { _, (personInfo, opplysninger) ->
-            profiler(personInfo, opplysninger)
-        }
+        .mapValues { _, (personInfo, opplysninger) -> profiler(personInfo, opplysninger) }
         .to(applicationConfiguration.profileringTopic)
     return streamBuilder.build()
 }
-
-fun TopicsJoin.isComplete() = periode != null && opplysningerOmArbeidssoeker != null
