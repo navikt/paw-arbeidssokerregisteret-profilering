@@ -10,7 +10,6 @@ import org.apache.kafka.streams.processor.api.Record
 import org.apache.kafka.streams.state.KeyValueStore
 import org.slf4j.LoggerFactory
 import java.time.Duration
-import java.time.Duration.between
 import java.time.Instant
 import java.util.*
 import kotlin.reflect.KClass

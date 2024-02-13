@@ -24,7 +24,7 @@ fun TopicsJoin.periodeId(): UUID =
         ?: profilering?.periodeId
         ?: throw IllegalStateException("Minst et felt i TopicsJoin må være satt!")
 
-fun TopicsJoin.isComplete() = periode != null || opplysningerOmArbeidssoeker != null
+fun TopicsJoin.isComplete() = periode != null && opplysningerOmArbeidssoeker != null
 
 infix fun TopicsJoin.mergeTo(existingData: TopicsJoin?): TopicsJoin =
     TopicsJoin(

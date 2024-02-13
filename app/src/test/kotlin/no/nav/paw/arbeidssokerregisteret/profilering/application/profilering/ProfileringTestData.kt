@@ -4,7 +4,6 @@ import no.nav.paw.aareg.Ansettelsesperiode
 import no.nav.paw.aareg.Arbeidsforhold
 import no.nav.paw.aareg.Arbeidsgiver
 import no.nav.paw.aareg.Opplysningspliktig
-import no.nav.paw.aareg.Periode
 import no.nav.paw.arbeidssokerregisteret.api.v1.Annet
 import no.nav.paw.arbeidssokerregisteret.api.v1.Arbeidserfaring
 import no.nav.paw.arbeidssokerregisteret.api.v1.Bruker
@@ -13,6 +12,7 @@ import no.nav.paw.arbeidssokerregisteret.api.v1.Helse
 import no.nav.paw.arbeidssokerregisteret.api.v1.JaNeiVetIkke
 import no.nav.paw.arbeidssokerregisteret.api.v1.Jobbsituasjon
 import no.nav.paw.arbeidssokerregisteret.api.v1.Metadata
+import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
 import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
 import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
 import no.nav.paw.arbeidssokerregisteret.api.v3.OpplysningerOmArbeidssoeker
@@ -23,6 +23,7 @@ import java.time.LocalDate
 import java.time.Month
 import java.time.ZoneOffset
 import java.util.*
+import no.nav.paw.aareg.Periode as AaregPeriode
 
 object ProfileringTestData {
     private val today = LocalDate.now()
@@ -36,7 +37,7 @@ object ProfileringTestData {
             organisasjonsnummer = organisasjonsNummer
         ),
         ansettelsesperiode = Ansettelsesperiode(
-            periode = Periode(
+            periode = AaregPeriode(
                 fom = today.minusYears(1),
                 tom = null
             )
@@ -80,7 +81,7 @@ object ProfileringTestData {
         /* annet = */ Annet(JaNeiVetIkke.NEI)
     )
 
-    val periode = no.nav.paw.arbeidssokerregisteret.api.v1.Periode(
+    val periode = Periode(
         uuid,
         identitetsnummer,
         Metadata(
@@ -110,8 +111,10 @@ object ProfileringTestData {
         20
     )
 
-    val personInfo = PersonInfo(LocalDate.of(1986, 11,26), 1990, listOf(arbeidsforhold))
+    val personInfo = PersonInfo(LocalDate.of(1986, 11, 26), 1990, listOf(arbeidsforhold))
 
     fun standardOpplysningerOmArbeidssoekerBuilder(): OpplysningerOmArbeidssoeker.Builder =
         OpplysningerOmArbeidssoeker.newBuilder(standardOpplysningerOmArbeidssoeker)
+
+    fun periodeBuilder(): Periode.Builder = Periode.newBuilder(periode)
 }
