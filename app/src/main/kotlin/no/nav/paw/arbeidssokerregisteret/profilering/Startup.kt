@@ -6,7 +6,6 @@ import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import no.nav.paw.arbeidssokerregisteret.profilering.application.APPLICATION_CONFIG_FILE
 import no.nav.paw.arbeidssokerregisteret.profilering.application.ApplicationConfiguration
-import no.nav.paw.arbeidssokerregisteret.profilering.application.SuppressionConfig
 import no.nav.paw.arbeidssokerregisteret.profilering.application.applicationTopology
 import no.nav.paw.arbeidssokerregisteret.profilering.health.Health
 import no.nav.paw.arbeidssokerregisteret.profilering.health.initKtor
@@ -21,10 +20,8 @@ import org.apache.kafka.common.serialization.Serdes.LongSerde
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler
-import org.apache.kafka.streams.processor.PunctuationType
 import org.apache.kafka.streams.state.Stores
 import org.slf4j.LoggerFactory
-import java.time.Duration
 
 fun main() {
     val logger = LoggerFactory.getLogger("app")
@@ -35,10 +32,11 @@ fun main() {
     val streamsConfig = KafkaStreamsFactory(applicationConfig.applicationIdSuffix, kafkaConfig)
         .withDefaultKeySerde(LongSerde::class)
         .withDefaultValueSerde(SpecificAvroSerde::class)
+    val stateStoreName = "joingStateStore"
     val streamsBuilder = StreamsBuilder()
         .addStateStore(
-            Stores.timestampedKeyValueStoreBuilder(
-                Stores.persistentKeyValueStore("periodeTombstoneDelayStore"),
+            Stores.keyValueStoreBuilder(
+                Stores.persistentKeyValueStore(stateStoreName),
                 Serdes.Long(),
                 streamsConfig.createSpecificAvroSerde()
             )
@@ -47,14 +45,7 @@ fun main() {
     val topology = applicationTopology(
         streamBuilder = streamsBuilder,
         personInfoTjeneste = PersonInfoTjeneste.create(),
-        applicationConfiguration = applicationConfig,
-        suppressionConfig = SuppressionConfig(
-            stateStoreName = "periodeTombstoneDelayStore",
-            scheduleInterval = Duration.ofMinutes(1),
-            scheduleType = PunctuationType.WALL_CLOCK_TIME,
-            suppressFor = Duration.ofHours(1),
-            suppressDurationType = SuppressionConfig.Type.ANY
-        ) { _, value -> value.avsluttet != null }
+        applicationConfiguration = applicationConfig
     )
 
     val kafkaStreams = KafkaStreams(topology, streamsConfig.properties)

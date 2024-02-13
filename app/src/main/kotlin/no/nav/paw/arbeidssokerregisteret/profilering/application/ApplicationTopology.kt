@@ -1,5 +1,6 @@
 package no.nav.paw.arbeidssokerregisteret.profilering.application
 
+import no.nav.paw.arbeidssokerregisteret.api.helpers.v3.TopicsJoin
 import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
 import no.nav.paw.arbeidssokerregisteret.api.v3.OpplysningerOmArbeidssoeker
 import no.nav.paw.arbeidssokerregisteret.profilering.application.profilering.profiler
@@ -9,33 +10,33 @@ import org.apache.kafka.streams.Topology
 import org.slf4j.LoggerFactory
 
 fun applicationTopology(
-    suppressionConfig: SuppressionConfig<Long, Periode>,
     streamBuilder: StreamsBuilder,
     personInfoTjeneste: PersonInfoTjeneste,
     applicationConfiguration: ApplicationConfiguration
 ): Topology {
     val logger = LoggerFactory.getLogger("applicationTopology")
-    val periodeTabell = streamBuilder
+    streamBuilder
         .stream<Long, Periode>(applicationConfiguration.periodeTopic)
-        .conditionallySuppress(suppressionConfig)
-        .mapValues { _, periode -> if (periode.avsluttet == null) periode else null }
-        .toTable()
+        .mapValues { _, periode -> TopicsJoin(periode, null, null) }
+        .saveAndForwardIfComplete(PeriodeStateStoreSave::class, "periodeStateStore")
 
     streamBuilder
         .stream<Long, OpplysningerOmArbeidssoeker>(applicationConfiguration.opplysningerTopic)
-        .peek { _, opplysninger -> logger.trace("Opplysninger id (prejoin): {}", opplysninger.id) }
-        .join(periodeTabell) { opplysninger, periode ->
-            periode?.identitetsnummer?.let { identitetsnummer ->
-                identitetsnummer to opplysninger
+        .mapValues { _, opplysninger -> TopicsJoin(null, opplysninger, null) }
+        .saveAndForwardIfComplete(OpplysningerOmArbeidssoekerStateStoreSave::class, "opplysningerStateStore")
+        .filter { key, topicsJoins ->
+            val periode = topicsJoins.periode
+            val opplysninger = topicsJoins.opplysningerOmArbeidssoeker
+            (periode != null && opplysninger != null).also { komplett ->
+                if (!komplett) {
+                    logger.error(
+                        "Mangler enten periode eller opplysninger om arbeidssøker, denne skulle ikke vært videresendt: key={}",
+                        key
+                    )
+                }
             }
         }
-        .peek { _, v -> logger.trace("Opplysninger id (postjoin): {}", v.second.id) }
-        .mapValues { _, (identitetsnummer, opplysninger) ->
-            val personInfo = personInfoTjeneste.hentPersonInfo(identitetsnummer, opplysninger.id)
-            personInfo to opplysninger
-        }.mapValues { _, (personInfo, opplysninger) ->
-            profiler(personInfo, opplysninger)
-        }.to(applicationConfiguration.profileringTopic)
+        .to(applicationConfiguration.profileringTopic)
     return streamBuilder.build()
 }
 

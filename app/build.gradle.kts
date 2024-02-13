@@ -7,7 +7,7 @@ plugins {
     application
 }
 
-val arbeidssokerregisteretVersion = "24.02.06.129-1"
+val arbeidssokerregisteretVersion = "1.7885919526.15-1"
 val navCommonModulesVersion = "3.2023.12.12_13.53-510909d4aa1a"
 val logstashVersion = "7.3"
 val logbackVersion = "1.4.12"
@@ -21,7 +21,7 @@ val schema by configurations.creating {
 }
 
 dependencies {
-    schema("no.nav.paw.arbeidssokerregisteret.api.schema:eksternt-api:$arbeidssokerregisteretVersion")
+    schema("no.nav.paw.arbeidssokerregisteret.api:main-avro-schema:$arbeidssokerregisteretVersion")
     implementation("no.nav.paw:aareg-client:$pawAaRegClientVersion")
     implementation("no.nav.paw:pdl-client:$pawPdlClientsVersion")
 
