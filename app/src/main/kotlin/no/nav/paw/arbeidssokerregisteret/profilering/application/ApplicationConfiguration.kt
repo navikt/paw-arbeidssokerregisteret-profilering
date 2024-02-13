@@ -5,5 +5,7 @@ data class ApplicationConfiguration(
     val periodeTopic: String,
     val opplysningerTopic: String,
     val profileringTopic: String,
-    val applicationIdSuffix: String
+    val applicationIdSuffix: String,
+    val periodeStateStoreName: String,
+    val opplysningerStateStoreName: String
 )

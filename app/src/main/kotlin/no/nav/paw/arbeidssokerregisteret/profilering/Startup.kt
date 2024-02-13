@@ -32,12 +32,19 @@ fun main() {
     val streamsConfig = KafkaStreamsFactory(applicationConfig.applicationIdSuffix, kafkaConfig)
         .withDefaultKeySerde(LongSerde::class)
         .withDefaultValueSerde(SpecificAvroSerde::class)
-    val stateStoreName = "joingStateStore"
+
     val streamsBuilder = StreamsBuilder()
         .addStateStore(
             Stores.keyValueStoreBuilder(
-                Stores.persistentKeyValueStore(stateStoreName),
-                Serdes.Long(),
+                Stores.persistentKeyValueStore(applicationConfig.periodeStateStoreName),
+                Serdes.String(),
+                streamsConfig.createSpecificAvroSerde()
+            )
+        )
+        .addStateStore(
+            Stores.keyValueStoreBuilder(
+                Stores.persistentKeyValueStore(applicationConfig.opplysningerStateStoreName),
+                Serdes.String(),
                 streamsConfig.createSpecificAvroSerde()
             )
         )

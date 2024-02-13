@@ -18,19 +18,25 @@ import org.apache.kafka.streams.state.Stores
 
 class ApplicationTest : FreeSpec({
     val applicationConfig = loadNaisOrLocalConfiguration<ApplicationConfiguration>(APPLICATION_CONFIG_FILE)
-    val stateStoreName = "joinStore"
     val streamsBuilder = StreamsBuilder()
         .addStateStore(
             Stores.keyValueStoreBuilder(
-                Stores.persistentKeyValueStore(stateStoreName),
-                Serdes.Long(),
-                SpecificAvroSerde()
+                Stores.persistentKeyValueStore(applicationConfig.periodeStateStoreName),
+                Serdes.String(),
+                createAvroSerde()
+            )
+        )
+        .addStateStore(
+            Stores.keyValueStoreBuilder(
+                Stores.persistentKeyValueStore(applicationConfig.opplysningerStateStoreName),
+                Serdes.String(),
+                createAvroSerde()
             )
         )
     val topology = applicationTopology(
         streamBuilder = streamsBuilder,
         personInfoTjeneste = { _, _ -> ProfileringTestData.personInfo },
-        applicationConfiguration = applicationConfig,
+        applicationConfiguration = applicationConfig
     )
 
     val testDriver = TopologyTestDriver(topology, kafkaStreamProperties)

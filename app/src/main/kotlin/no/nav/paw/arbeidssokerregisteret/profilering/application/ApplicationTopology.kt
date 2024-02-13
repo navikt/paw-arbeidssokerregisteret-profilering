@@ -18,25 +18,32 @@ fun applicationTopology(
     streamBuilder
         .stream<Long, Periode>(applicationConfiguration.periodeTopic)
         .mapValues { _, periode -> TopicsJoin(periode, null, null) }
-        .saveAndForwardIfComplete(PeriodeStateStoreSave::class, "periodeStateStore")
+        .saveAndForwardIfComplete(PeriodeStateStoreSave::class, applicationConfiguration.periodeStateStoreName)
 
     streamBuilder
         .stream<Long, OpplysningerOmArbeidssoeker>(applicationConfiguration.opplysningerTopic)
-        .mapValues { _, opplysninger -> TopicsJoin(null, opplysninger, null) }
-        .saveAndForwardIfComplete(OpplysningerOmArbeidssoekerStateStoreSave::class, "opplysningerStateStore")
+        .mapValues { _, opplysninger -> TopicsJoin(null, null, opplysninger) }
+        .saveAndForwardIfComplete(OpplysningerOmArbeidssoekerStateStoreSave::class, applicationConfiguration.opplysningerStateStoreName)
         .filter { key, topicsJoins ->
-            val periode = topicsJoins.periode
-            val opplysninger = topicsJoins.opplysningerOmArbeidssoeker
-            (periode != null && opplysninger != null).also { komplett ->
-                if (!komplett) {
+            topicsJoins.isComplete().also { complete ->
+                if (!complete) {
                     logger.error(
                         "Mangler enten periode eller opplysninger om arbeidssøker, denne skulle ikke vært videresendt: key={}",
                         key
                     )
                 }
             }
+        }.mapValues { _, topicsJoins ->
+            val periode = topicsJoins.periode
+            val opplysninger = topicsJoins.opplysningerOmArbeidssoeker
+            val personInfo = personInfoTjeneste.hentPersonInfo(periode.identitetsnummer, opplysninger.id)
+            personInfo to opplysninger
+        }
+        .mapValues { _, (personInfo, opplysninger) ->
+            profiler(personInfo, opplysninger)
         }
         .to(applicationConfiguration.profileringTopic)
     return streamBuilder.build()
 }
 
+fun TopicsJoin.isComplete() = periode != null && opplysningerOmArbeidssoeker != null

@@ -1,6 +1,7 @@
 package no.nav.paw.arbeidssokerregisteret.profilering.application
 
 import no.nav.paw.arbeidssokerregisteret.api.helpers.v3.TopicsJoin
+import org.apache.avro.specific.SpecificRecord
 import org.apache.kafka.streams.kstream.KStream
 import org.apache.kafka.streams.kstream.Named
 import org.apache.kafka.streams.processor.PunctuationType
@@ -53,11 +54,7 @@ sealed class BaseStateStoreSave(
                 iterator.forEach { keyValue ->
                     val compositeKey = keyValue.key
                     val value = keyValue.value
-                    if (value.erUtdatert(
-                            gjeldeneTidspunkt = gjeldeneTidspunkt,
-                            maksAlderForAvsluttetPeriode = Duration.ofHours(1),
-                            maksAlderForFrittstaaendeOpplysning = Duration.ofHours(1)
-                        )) {
+                    if (value.isOutdated(currentTime = gjeldeneTidspunkt)) {
                         stateStore.delete(compositeKey)
                     }
                 }
@@ -74,7 +71,7 @@ sealed class BaseStateStoreSave(
         val newValue = record.value() mergeTo currentValue
         if (newValue.harPeriodeOgOpplysninger()) {
             ctx.forward(record.withValue(newValue))
-            //Vi kan få flere opplysninger på samme periode, så vi beholder den.
+            // Vi kan få flere opplysninger på samme periode, så vi beholder den.
             store.put(compositeKey, TopicsJoin(newValue.periode, null, null))
         } else {
             store.put(compositeKey, newValue)
@@ -89,24 +86,17 @@ infix fun TopicsJoin.mergeTo(existingData: TopicsJoin?): TopicsJoin =
         profilering ?: existingData?.profilering,
         opplysningerOmArbeidssoeker ?: existingData?.opplysningerOmArbeidssoeker
     )
-
-fun TopicsJoin.erUtdatert(
-    gjeldeneTidspunkt: Instant,
-    maksAlderForAvsluttetPeriode: Duration,
-    maksAlderForFrittstaaendeOpplysning: Duration
+fun TopicsJoin.isOutdated(
+    currentTime: Instant,
+    maxAgeForCompletedPeriode: Duration = Duration.ofHours(1),
+    maxAgeForStandaloneOpplysning: Duration = Duration.ofHours(1)
 ): Boolean {
-    return if (periode == null && opplysningerOmArbeidssoeker == null) {
-        true
-    } else {
-        val periodeUtlopt = periode?.avsluttet?.tidspunkt
-            ?.let { avsluttet -> between(avsluttet, gjeldeneTidspunkt).abs() }
-            ?.let { it > maksAlderForAvsluttetPeriode } ?: false
-        val frittStaaendeOpplysningForeldet = periode == null &&
-                opplysningerOmArbeidssoeker?.sendtInnAv?.tidspunkt
-                    ?.let { opplysningsTimestamp -> between(opplysningsTimestamp, gjeldeneTidspunkt).abs() }
-                    ?.let { it > maksAlderForFrittstaaendeOpplysning } ?: false
-        periodeUtlopt || frittStaaendeOpplysningForeldet
-    }
+    return periode?.avsluttet?.tidspunkt?.let { completedEnd ->
+        between(completedEnd, currentTime).abs() > maxAgeForCompletedPeriode
+    } ?: (periode == null &&
+            opplysningerOmArbeidssoeker?.sendtInnAv?.tidspunkt?.let { standaloneTimestamp ->
+                between(standaloneTimestamp, currentTime).abs() > maxAgeForStandaloneOpplysning
+            } ?: true)
 }
 
 fun TopicsJoin.periodeId(): UUID =
