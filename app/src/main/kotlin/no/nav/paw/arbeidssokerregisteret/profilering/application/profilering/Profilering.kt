@@ -8,6 +8,9 @@ import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfo
 import java.time.Period
 import java.time.ZoneId
 
+private const val MARGIN_FOR_SAMMENHENGENDE_JOBB_DAGER = 3
+private const val MINIMUM_SAMMENHENGENDE_JOBB_MND = 6
+private const val LENGDE_PAA_PERIODE_SOM_SKAL_SJEKKES_AAR = 1L
 fun profiler(
     personInfo: PersonInfo,
     opplysninger: OpplysningerOmArbeidssoeker
@@ -21,9 +24,9 @@ fun profiler(
                 evaluerHelse(opplysninger.helse) +
                 evaluerUtdanning(opplysninger.utdanning) +
                 evaluerArbeidsErfaring(
-                    3,
-                    Period.ofMonths(6),
-                    sendtInnDato.minusYears(1)..<sendtInnDato,
+                    MARGIN_FOR_SAMMENHENGENDE_JOBB_DAGER,
+                    Period.ofMonths(MINIMUM_SAMMENHENGENDE_JOBB_MND),
+                    sendtInnDato.minusYears(LENGDE_PAA_PERIODE_SOM_SKAL_SJEKKES_AAR)..<sendtInnDato,
                     personInfo.arbeidsforhold
                 )
 
