@@ -58,15 +58,14 @@ object ProfileringTestData {
         arbeidsforhold = ansattSisteAar
     )
 
+    val bruker = Bruker(BrukerType.SYSTEM, identitetsnummer)
+
     val standardOpplysningerOmArbeidssoeker = OpplysningerOmArbeidssoeker(
         /* id = */ UUID.randomUUID(),
         /* periodeId = */ uuid,
         /* sendtInnAv = */ Metadata(
-            today.atStartOfDay().toInstant(ZoneOffset.UTC),
-            Bruker(
-                BrukerType.SYSTEM,
-                "junit"
-            ),
+            today.toInstant(),
+            bruker,
             "junit",
             "unit-test"
         ),
@@ -81,16 +80,30 @@ object ProfileringTestData {
         /* annet = */ Annet(JaNeiVetIkke.NEI)
     )
 
+    val metadata = Metadata(
+        today.minusYears(1).toInstant(),
+        bruker,
+        "test",
+        "test"
+    )
+
     val periode = Periode(
         uuid,
         identitetsnummer,
+        metadata,
+        null
+    )
+
+    val avsluttetPeriode = Periode(
+        uuid,
+        identitetsnummer,
+        metadata,
         Metadata(
-            Instant.now(),
-            Bruker(BrukerType.SYSTEM, identitetsnummer),
+            today.minusDays(10).toInstant(),
+            bruker,
             "test",
             "test"
         ),
-        null
     )
 
     val profilering = Profilering(
@@ -99,10 +112,7 @@ object ProfileringTestData {
         standardOpplysningerOmArbeidssoeker.id,
         Metadata(
             Instant.now(),
-            Bruker(
-                BrukerType.SYSTEM,
-                identitetsnummer
-            ),
+            bruker,
             "test",
             "test"
         ),
@@ -113,8 +123,33 @@ object ProfileringTestData {
 
     val personInfo = PersonInfo(LocalDate.of(1986, 11, 26), 1990, listOf(arbeidsforhold))
 
+    fun standardOpplysninger(sendtInnTidspunkt: Instant = today.toInstant()): OpplysningerOmArbeidssoeker =
+        OpplysningerOmArbeidssoeker(
+            /* id = */ UUID.randomUUID(),
+            /* periodeId = */ uuid,
+            /* sendtInnAv = */ Metadata(
+                sendtInnTidspunkt,
+                bruker,
+                "junit",
+                "unit-test"
+            ),
+            /* utdanning = */ Utdanning(
+                "3",
+                JaNeiVetIkke.JA,
+                JaNeiVetIkke.JA,
+            ),
+            /* helse = */ Helse(JaNeiVetIkke.NEI),
+            /* arbeidserfaring = */ Arbeidserfaring(JaNeiVetIkke.JA),
+            /* jobbsituasjon = */ Jobbsituasjon(emptyList()),
+            /* annet = */ Annet(JaNeiVetIkke.NEI)
+        )
+
     fun standardOpplysningerOmArbeidssoekerBuilder(): OpplysningerOmArbeidssoeker.Builder =
         OpplysningerOmArbeidssoeker.newBuilder(standardOpplysningerOmArbeidssoeker)
 
     fun periodeBuilder(): Periode.Builder = Periode.newBuilder(periode)
+
+    fun metadataBuilder(): Metadata.Builder = Metadata.newBuilder(metadata)
+
+    fun LocalDate.toInstant() = atStartOfDay().toInstant(ZoneOffset.UTC)
 }

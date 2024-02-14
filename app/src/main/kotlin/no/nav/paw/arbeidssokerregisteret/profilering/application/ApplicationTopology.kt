@@ -7,18 +7,26 @@ import no.nav.paw.arbeidssokerregisteret.profilering.application.profilering.pro
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoTjeneste
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology
+import org.apache.kafka.streams.kstream.KStream
 import org.slf4j.LoggerFactory
+
+private val logger = LoggerFactory.getLogger("applicationTopology")
 
 fun applicationTopology(
     streamBuilder: StreamsBuilder,
     personInfoTjeneste: PersonInfoTjeneste,
     applicationConfiguration: ApplicationConfiguration
 ): Topology {
-    val logger = LoggerFactory.getLogger("applicationTopology")
     streamBuilder
         .stream<Long, Periode>(applicationConfiguration.periodeTopic)
         .mapValues { _, periode -> TopicsJoin(periode, null, null) }
-        .saveAndForwardIfComplete(PeriodeStateStoreSave::class, applicationConfiguration.joiningStateStoreName)
+        .saveAndForwardIfComplete(
+            PeriodeStateStoreSave::class,
+            applicationConfiguration.joiningStateStoreName
+        ).filterProfileAndForward(
+            personInfoTjeneste,
+            applicationConfiguration
+        )
 
     streamBuilder
         .stream<Long, OpplysningerOmArbeidssoeker>(applicationConfiguration.opplysningerTopic)
@@ -26,23 +34,32 @@ fun applicationTopology(
         .saveAndForwardIfComplete(
             OpplysningerOmArbeidssoekerStateStoreSave::class,
             applicationConfiguration.joiningStateStoreName
+        ).filterProfileAndForward(
+            personInfoTjeneste,
+            applicationConfiguration
         )
-        .filter { key, topicsJoins ->
-            topicsJoins.isComplete().also { complete ->
-                if (!complete) {
-                    logger.error(
-                        "Mangler enten periode eller opplysninger om arbeidssøker, denne skulle ikke vært videresendt: key={}",
-                        key
-                    )
-                }
+    return streamBuilder.build()
+}
+
+fun KStream<Long, TopicsJoin>.filterProfileAndForward(
+    personInfoTjeneste: PersonInfoTjeneste,
+    applicationConfiguration: ApplicationConfiguration
+) {
+    filter { key, topicsJoins ->
+        topicsJoins.isComplete().also { complete ->
+            if (!complete) {
+                logger.error(
+                    "Mangler enten periode eller opplysninger om arbeidssøker, denne skulle ikke vært videresendt: key={}",
+                    key
+                )
             }
-        }.mapValues { _, topicsJoins ->
-            val periode = topicsJoins.periode
-            val opplysninger = topicsJoins.opplysningerOmArbeidssoeker
-            val personInfo = personInfoTjeneste.hentPersonInfo(periode.identitetsnummer, opplysninger.id)
-            personInfo to opplysninger
         }
+    }.mapValues { _, topicsJoins ->
+        val periode = topicsJoins.periode
+        val opplysninger = topicsJoins.opplysningerOmArbeidssoeker
+        val personInfo = personInfoTjeneste.hentPersonInfo(periode.identitetsnummer, opplysninger.id)
+        personInfo to opplysninger
+    }
         .mapValues { _, (personInfo, opplysninger) -> profiler(personInfo, opplysninger) }
         .to(applicationConfiguration.profileringTopic)
-    return streamBuilder.build()
 }

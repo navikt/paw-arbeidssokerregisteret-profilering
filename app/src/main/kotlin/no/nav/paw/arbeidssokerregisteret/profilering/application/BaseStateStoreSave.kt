@@ -8,6 +8,7 @@ import org.apache.kafka.streams.processor.api.Processor
 import org.apache.kafka.streams.processor.api.ProcessorContext
 import org.apache.kafka.streams.processor.api.Record
 import org.apache.kafka.streams.state.KeyValueStore
+import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.Instant
 import java.util.*
@@ -29,6 +30,8 @@ sealed class BaseStateStoreSave(
 ) : Processor<Long, TopicsJoin, Long, TopicsJoin> {
     private var stateStore: KeyValueStore<String, TopicsJoin>? = null
     private var context: ProcessorContext<Long, TopicsJoin>? = null
+    private val logger = LoggerFactory.getLogger("applicationTopology")
+
 
     override fun init(context: ProcessorContext<Long, TopicsJoin>?) {
         super.init(context)
@@ -46,13 +49,12 @@ sealed class BaseStateStoreSave(
         interval: Duration = Duration.ofMinutes(10)
     ) = ctx.schedule(interval, PunctuationType.STREAM_TIME) { time ->
         val currentTime = Instant.ofEpochMilli(time)
-        stateStore.all().use { iterator ->
-            iterator.forEach { keyValue ->
-                val compositeKey = keyValue.key
-                val value = keyValue.value
-                if (value.isOutdated(currentTime = currentTime)) {
-                    stateStore.delete(compositeKey)
-                }
+        stateStore.all().forEach { keyValue ->
+            val compositeKey = keyValue.key
+            val value = keyValue.value
+            if (value.isOutdated(currentTime)) {
+                logger.debug("Sletter utdatert record med key: $compositeKey")
+                stateStore.delete(compositeKey)
             }
         }
     }
@@ -74,7 +76,7 @@ sealed class BaseStateStoreSave(
     }
 }
 
-fun compositeKey(orginalKey: Long, periodeId: UUID) = "$orginalKey:${periodeId}"
+fun compositeKey(orginalKey: Long, periodeId: UUID) = "$orginalKey:$periodeId"
 
 class OpplysningerOmArbeidssoekerStateStoreSave(
     stateStoreName: String
