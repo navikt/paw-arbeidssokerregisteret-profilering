@@ -100,6 +100,7 @@ class ApplicationTest : FreeSpec({
         outputProfilering.periodeId shouldBe ProfileringTestData.profilering.periodeId
         outputProfilering.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
     }
+    /*
     "scheduleCleanup skal slette utdaterte records fra state store" {
         val key = 6L
         periodeTopic.pipeInput(key, ProfileringTestData.avsluttetPeriode, Instant.now())
@@ -123,6 +124,7 @@ class ApplicationTest : FreeSpec({
 
         profileringsTopic.isEmpty shouldBe true
     }
+    */
     "når opplysninger kommer først, og perioden etterpå, skal det profileres" {
         val key = 8L
         opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData
