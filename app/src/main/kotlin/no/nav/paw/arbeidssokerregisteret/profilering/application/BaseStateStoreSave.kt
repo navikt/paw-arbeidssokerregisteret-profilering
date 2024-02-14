@@ -8,7 +8,6 @@ import org.apache.kafka.streams.processor.api.Processor
 import org.apache.kafka.streams.processor.api.ProcessorContext
 import org.apache.kafka.streams.processor.api.Record
 import org.apache.kafka.streams.state.KeyValueStore
-import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.Instant
 import java.util.*
@@ -30,7 +29,6 @@ sealed class BaseStateStoreSave(
 ) : Processor<Long, TopicsJoin, Long, TopicsJoin> {
     private var stateStore: KeyValueStore<String, TopicsJoin>? = null
     private var context: ProcessorContext<Long, TopicsJoin>? = null
-    private val logger = LoggerFactory.getLogger(this::class.java)
 
     override fun init(context: ProcessorContext<Long, TopicsJoin>?) {
         super.init(context)
@@ -44,17 +42,16 @@ sealed class BaseStateStoreSave(
 
     private fun scheduleCleanup(
         ctx: ProcessorContext<Long, TopicsJoin>,
-        stateStore: KeyValueStore<String, TopicsJoin>
-    ) {
-        ctx.schedule(Duration.ofMinutes(10), PunctuationType.STREAM_TIME) { time ->
-            val currentTime = Instant.ofEpochMilli(time)
-            stateStore.all().use { iterator ->
-                iterator.forEach { keyValue ->
-                    val compositeKey = keyValue.key
-                    val value = keyValue.value
-                    if (value.isOutdated(currentTime = currentTime)) {
-                        stateStore.delete(compositeKey)
-                    }
+        stateStore: KeyValueStore<String, TopicsJoin>,
+        interval: Duration = Duration.ofMinutes(10)
+    ) = ctx.schedule(interval, PunctuationType.STREAM_TIME) { time ->
+        val currentTime = Instant.ofEpochMilli(time)
+        stateStore.all().use { iterator ->
+            iterator.forEach { keyValue ->
+                val compositeKey = keyValue.key
+                val value = keyValue.value
+                if (value.isOutdated(currentTime = currentTime)) {
+                    stateStore.delete(compositeKey)
                 }
             }
         }
