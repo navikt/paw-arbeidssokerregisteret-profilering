@@ -5,7 +5,7 @@ dependencyResolutionManagement {
     val githubPassword: String by settings
     repositories {
         maven {
-            setUrl("https://maven.pkg.github.com/navikt/*")
+            setUrl("https://maven.pkg.github.com/navikt/paw-arbeidssokerregisteret-api")
             credentials {
                 username = "x-access-token"
                 password = githubPassword

@@ -1,4 +1,5 @@
 periodeTopic = "paw.arbeidssokerperioder-beta-v7"
 opplysningerTopic = "paw.opplysninger-om-arbeidssoeker-beta-v7"
-profileringTopic = "paw.arbeidssoker-profilering-beta-v1"
-applicationIdSuffix = "v1"
+profileringTopic = "paw.arbeidssoker-profilering-beta-v2"
+applicationIdSuffix = "v2"
+joiningStateStoreName = "joiningStateStore"

@@ -3,6 +3,8 @@ package no.nav.paw.arbeidssokerregisteret.profilering.personinfo.authentication
 import com.nimbusds.jose.jwk.KeyUse
 import com.nimbusds.jose.jwk.RSAKey
 import no.nav.common.token_client.builder.AzureAdTokenClientBuilder
+import no.nav.common.token_client.cache.CaffeineTokenCache
+import no.nav.common.token_client.cache.TokenCache
 import no.nav.common.token_client.client.AzureAdMachineToMachineTokenClient
 import java.security.KeyPairGenerator
 import java.security.interfaces.RSAPrivateKey
@@ -19,6 +21,7 @@ fun azureAdTokenClient(azureConfig: AzureConfig): AzureAdMachineToMachineTokenCl
     return when (System.getenv("NAIS_CLUSTER_NAME")) {
         "prod-gcp", "dev-gcp" -> AzureAdTokenClientBuilder.builder()
             .withNaisDefaults()
+            .withCache(CaffeineTokenCache())
             .buildMachineToMachineTokenClient()
 
         else -> AzureAdTokenClientBuilder.builder()

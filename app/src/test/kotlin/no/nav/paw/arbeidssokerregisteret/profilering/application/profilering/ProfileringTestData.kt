@@ -4,7 +4,6 @@ import no.nav.paw.aareg.Ansettelsesperiode
 import no.nav.paw.aareg.Arbeidsforhold
 import no.nav.paw.aareg.Arbeidsgiver
 import no.nav.paw.aareg.Opplysningspliktig
-import no.nav.paw.aareg.Periode
 import no.nav.paw.arbeidssokerregisteret.api.v1.Annet
 import no.nav.paw.arbeidssokerregisteret.api.v1.Arbeidserfaring
 import no.nav.paw.arbeidssokerregisteret.api.v1.Bruker
@@ -13,6 +12,7 @@ import no.nav.paw.arbeidssokerregisteret.api.v1.Helse
 import no.nav.paw.arbeidssokerregisteret.api.v1.JaNeiVetIkke
 import no.nav.paw.arbeidssokerregisteret.api.v1.Jobbsituasjon
 import no.nav.paw.arbeidssokerregisteret.api.v1.Metadata
+import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
 import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
 import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
 import no.nav.paw.arbeidssokerregisteret.api.v3.OpplysningerOmArbeidssoeker
@@ -23,6 +23,7 @@ import java.time.LocalDate
 import java.time.Month
 import java.time.ZoneOffset
 import java.util.*
+import no.nav.paw.aareg.Periode as AaregPeriode
 
 object ProfileringTestData {
     private val today = LocalDate.now()
@@ -36,7 +37,7 @@ object ProfileringTestData {
             organisasjonsnummer = organisasjonsNummer
         ),
         ansettelsesperiode = Ansettelsesperiode(
-            periode = Periode(
+            periode = AaregPeriode(
                 fom = today.minusYears(1),
                 tom = null
             )
@@ -57,15 +58,14 @@ object ProfileringTestData {
         arbeidsforhold = ansattSisteAar
     )
 
+    val bruker = Bruker(BrukerType.SYSTEM, identitetsnummer)
+
     val standardOpplysningerOmArbeidssoeker = OpplysningerOmArbeidssoeker(
         /* id = */ UUID.randomUUID(),
         /* periodeId = */ uuid,
         /* sendtInnAv = */ Metadata(
-            today.atStartOfDay().toInstant(ZoneOffset.UTC),
-            Bruker(
-                BrukerType.SYSTEM,
-                "junit"
-            ),
+            today.toInstant(),
+            bruker,
             "junit",
             "unit-test"
         ),
@@ -80,16 +80,30 @@ object ProfileringTestData {
         /* annet = */ Annet(JaNeiVetIkke.NEI)
     )
 
-    val periode = no.nav.paw.arbeidssokerregisteret.api.v1.Periode(
+    val metadata = Metadata(
+        today.minusYears(1).toInstant(),
+        bruker,
+        "test",
+        "test"
+    )
+
+    val periode = Periode(
         uuid,
         identitetsnummer,
+        metadata,
+        null
+    )
+
+    val avsluttetPeriode = Periode(
+        uuid,
+        identitetsnummer,
+        metadata,
         Metadata(
-            Instant.now(),
-            Bruker(BrukerType.SYSTEM, identitetsnummer),
+            today.minusDays(10).toInstant(),
+            bruker,
             "test",
             "test"
         ),
-        null
     )
 
     val profilering = Profilering(
@@ -98,10 +112,7 @@ object ProfileringTestData {
         standardOpplysningerOmArbeidssoeker.id,
         Metadata(
             Instant.now(),
-            Bruker(
-                BrukerType.SYSTEM,
-                identitetsnummer
-            ),
+            bruker,
             "test",
             "test"
         ),
@@ -110,8 +121,35 @@ object ProfileringTestData {
         20
     )
 
-    val personInfo = PersonInfo(LocalDate.of(1986, 11,26), 1990, listOf(arbeidsforhold))
+    val personInfo = PersonInfo(LocalDate.of(1986, 11, 26), 1990, listOf(arbeidsforhold))
+
+    fun standardOpplysninger(sendtInnTidspunkt: Instant = today.toInstant()): OpplysningerOmArbeidssoeker =
+        OpplysningerOmArbeidssoeker(
+            /* id = */ UUID.randomUUID(),
+            /* periodeId = */ uuid,
+            /* sendtInnAv = */ Metadata(
+                sendtInnTidspunkt,
+                bruker,
+                "junit",
+                "unit-test"
+            ),
+            /* utdanning = */ Utdanning(
+                "3",
+                JaNeiVetIkke.JA,
+                JaNeiVetIkke.JA,
+            ),
+            /* helse = */ Helse(JaNeiVetIkke.NEI),
+            /* arbeidserfaring = */ Arbeidserfaring(JaNeiVetIkke.JA),
+            /* jobbsituasjon = */ Jobbsituasjon(emptyList()),
+            /* annet = */ Annet(JaNeiVetIkke.NEI)
+        )
 
     fun standardOpplysningerOmArbeidssoekerBuilder(): OpplysningerOmArbeidssoeker.Builder =
         OpplysningerOmArbeidssoeker.newBuilder(standardOpplysningerOmArbeidssoeker)
+
+    fun periodeBuilder(): Periode.Builder = Periode.newBuilder(periode)
+
+    fun metadataBuilder(): Metadata.Builder = Metadata.newBuilder(metadata)
+
+    fun LocalDate.toInstant() = atStartOfDay().toInstant(ZoneOffset.UTC)
 }
