@@ -61,9 +61,9 @@ sealed class BaseStateStoreSave(
     }
 
     override fun process(record: Record<Long, TopicsJoin>?) {
+        if (record == null) return
         val store = requireNotNull(stateStore) { "State store is not initialized" }
         val ctx = requireNotNull(context) { "Context is not initialized" }
-        if (record == null) return
         val compositeKey = compositeKey(record.key(), record.value().periodeId())
         val currentValue = store.get(compositeKey)
         val newValue = record.value() mergeTo currentValue
