@@ -1,5 +1,8 @@
 package no.nav.paw.arbeidssokerregisteret.profilering.application
 
+import io.micrometer.core.instrument.Tag
+import io.micrometer.core.instrument.Tags
+import io.micrometer.prometheus.PrometheusMeterRegistry
 import no.nav.paw.arbeidssokerregisteret.api.helpers.v3.TopicsJoin
 import org.apache.kafka.streams.kstream.KStream
 import org.apache.kafka.streams.kstream.Named
@@ -12,31 +15,44 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.Instant
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicLong
 import kotlin.reflect.KClass
 
 fun KStream<Long, TopicsJoin>.saveAndForwardIfComplete(
     type: KClass<out BaseStateStoreSave>,
     stateStoreName: String,
+    prometheusMeterRegistry: PrometheusMeterRegistry
 ): KStream<Long, TopicsJoin> {
     val processor = {
-        type.java.getDeclaredConstructor(String::class.java)
-            .newInstance(stateStoreName)
+        type.java.getDeclaredConstructor(String::class.java, PrometheusMeterRegistry::class.java)
+            .newInstance(stateStoreName, prometheusMeterRegistry)
     }
     return process(processor, Named.`as`(type.simpleName), stateStoreName)
 }
 
 sealed class BaseStateStoreSave(
-    private val stateStoreName: String
+    private val stateStoreName: String,
+    private val prometheusMeterRegistry: PrometheusMeterRegistry
 ) : Processor<Long, TopicsJoin, Long, TopicsJoin> {
     private var stateStore: KeyValueStore<String, TopicsJoin>? = null
     private var context: ProcessorContext<Long, TopicsJoin>? = null
     private val logger = LoggerFactory.getLogger("applicationTopology")
-
+    private val metricsMap = ConcurrentHashMap<Int, AtomicLong>()
 
     override fun init(context: ProcessorContext<Long, TopicsJoin>?) {
         super.init(context)
         this.context = context
         stateStore = context?.getStateStore(stateStoreName)
+        val gaugeValue = metricsMap.computeIfAbsent(context?.taskId()?.partition() ?: 0) { _ -> AtomicLong(0) }
+        prometheusMeterRegistry.gauge(
+            METRICS_STATE_STORE_ELEMENTS,
+            Tags.of(
+                Tag.of(LABEL_STATE_STORE_NAME, stateStoreName),
+                Tag.of(LABEL_STATE_STORE_PARTITION, context?.taskId()?.partition().toString())
+            ),
+            gaugeValue
+        )
         scheduleCleanup(
             requireNotNull(context) { "Context is not initialized" },
             requireNotNull(stateStore) { "State store is not initialized" }
@@ -49,7 +65,9 @@ sealed class BaseStateStoreSave(
         interval: Duration = Duration.ofMinutes(10)
     ) = ctx.schedule(interval, PunctuationType.STREAM_TIME) { time ->
         val currentTime = Instant.ofEpochMilli(time)
-        stateStore.all().forEach { keyValue ->
+        var valuesIntStore: Long = 0L
+        stateStore.all().forEachRemaining { keyValue ->
+            valuesIntStore += 1
             val compositeKey = keyValue.key
             val value = keyValue.value
             if (value.isOutdated(currentTime)) {
@@ -57,6 +75,7 @@ sealed class BaseStateStoreSave(
                 stateStore.delete(compositeKey)
             }
         }
+        metricsMap[ctx.taskId().partition()]?.set(valuesIntStore)
     }
 
     override fun process(record: Record<Long, TopicsJoin>?) {
@@ -79,9 +98,11 @@ sealed class BaseStateStoreSave(
 fun compositeKey(orginalKey: Long, periodeId: UUID) = "$orginalKey:$periodeId"
 
 class OpplysningerOmArbeidssoekerStateStoreSave(
-    stateStoreName: String
-) : BaseStateStoreSave(stateStoreName)
+    stateStoreName: String,
+    prometheusMeterRegistry: PrometheusMeterRegistry
+) : BaseStateStoreSave(stateStoreName, prometheusMeterRegistry)
 
 class PeriodeStateStoreSave(
-    stateStoreName: String
-) : BaseStateStoreSave(stateStoreName)
+    stateStoreName: String,
+    prometheusMeterRegistry: PrometheusMeterRegistry
+) : BaseStateStoreSave(stateStoreName, prometheusMeterRegistry)

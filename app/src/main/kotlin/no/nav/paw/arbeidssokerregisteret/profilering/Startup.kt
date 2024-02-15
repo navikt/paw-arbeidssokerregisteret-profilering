@@ -45,7 +45,8 @@ fun main() {
     val topology = applicationTopology(
         streamBuilder = streamsBuilder,
         personInfoTjeneste = PersonInfoTjeneste.create(),
-        applicationConfiguration = applicationConfig
+        applicationConfiguration = applicationConfig,
+        prometheusRegistry = prometheusMeterRegistry
     )
 
     val kafkaStreams = KafkaStreams(topology, streamsConfig.properties)
