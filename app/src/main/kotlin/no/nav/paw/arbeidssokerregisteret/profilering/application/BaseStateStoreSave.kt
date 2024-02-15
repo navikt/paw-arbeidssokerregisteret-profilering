@@ -31,6 +31,7 @@ fun KStream<Long, TopicsJoin>.saveAndForwardIfComplete(
     return process(processor, Named.`as`(type.simpleName), stateStoreName)
 }
 
+private val metricsMap = ConcurrentHashMap<Int, AtomicLong>()
 sealed class BaseStateStoreSave(
     private val stateStoreName: String,
     private val prometheusMeterRegistry: PrometheusMeterRegistry
@@ -38,7 +39,6 @@ sealed class BaseStateStoreSave(
     private var stateStore: KeyValueStore<String, TopicsJoin>? = null
     private var context: ProcessorContext<Long, TopicsJoin>? = null
     private val logger = LoggerFactory.getLogger("applicationTopology")
-    private val metricsMap = ConcurrentHashMap<Int, AtomicLong>()
 
     override fun init(context: ProcessorContext<Long, TopicsJoin>?) {
         super.init(context)
