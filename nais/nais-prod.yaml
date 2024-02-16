@@ -11,8 +11,8 @@ spec:
       enabled: true
   image: {{ image }}
   replicas:
-    min: 3
-    max: 3
+    min: 6
+    max: 6
   resources:
     limits:
       cpu: 3500m
