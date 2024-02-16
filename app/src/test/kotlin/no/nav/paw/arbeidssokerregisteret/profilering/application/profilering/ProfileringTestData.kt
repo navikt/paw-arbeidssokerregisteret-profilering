@@ -6,6 +6,7 @@ import no.nav.paw.aareg.Arbeidsgiver
 import no.nav.paw.aareg.Opplysningspliktig
 import no.nav.paw.arbeidssokerregisteret.api.v1.Annet
 import no.nav.paw.arbeidssokerregisteret.api.v1.Arbeidserfaring
+import no.nav.paw.arbeidssokerregisteret.api.v1.BeskrivelseMedDetaljer
 import no.nav.paw.arbeidssokerregisteret.api.v1.Bruker
 import no.nav.paw.arbeidssokerregisteret.api.v1.BrukerType
 import no.nav.paw.arbeidssokerregisteret.api.v1.Helse
@@ -31,17 +32,78 @@ object ProfileringTestData {
     const val identitetsnummer = "12345678911"
     private val uuid = UUID.randomUUID()
 
-    val arbeidsforhold = Arbeidsforhold(
-        arbeidsgiver = Arbeidsgiver(
+    fun standardBrukerPersonInfo(
+        foedselsdato: LocalDate = LocalDate.of(1986, Month.MAY, 1),
+        foedselsAar: Int = 1986,
+        arbeidsforhold: List<Arbeidsforhold> = ansattSisteAar
+    ): PersonInfo =
+        PersonInfo(
+            foedselsdato = foedselsdato,
+            foedselsAar = foedselsAar,
+            arbeidsforhold = arbeidsforhold
+        )
+
+    fun standardOpplysninger(
+        sendtInnTidspunkt: Instant = today.toInstant(),
+        utdanning: Utdanning = utdanning(),
+        helse: Helse = helse(),
+        arbeidserfaring: Arbeidserfaring = arbeidserfaring(),
+        jobbsituasjon: Jobbsituasjon = jobbsituasjon(),
+        annet: Annet = annet()
+    ): OpplysningerOmArbeidssoeker =
+        OpplysningerOmArbeidssoeker(
+            UUID.randomUUID(),
+            uuid,
+            Metadata(
+                sendtInnTidspunkt,
+                bruker,
+                "junit",
+                "unit-test"
+            ),
+            utdanning,
+            helse,
+            arbeidserfaring,
+            jobbsituasjon,
+            annet
+        )
+
+    fun standardProfilering(
+        id: UUID = UUID.randomUUID(),
+        periodeId: UUID = uuid,
+        opplysningerOmArbeidssokerId: UUID = standardOpplysninger().id
+    ) = Profilering(
+        id,
+        periodeId,
+        opplysningerOmArbeidssokerId,
+        Metadata(
+            Instant.now(),
+            bruker,
+            "test",
+            "test"
+        ),
+        ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING,
+        false,
+        20
+    )
+
+    fun ansettelsesperiode(
+        fom: LocalDate = today.minusYears(1),
+        tom: LocalDate? = null
+    ) = Ansettelsesperiode(
+        periode = AaregPeriode(
+            fom = fom,
+            tom = tom
+        )
+    )
+
+    fun arbeidsforhold(
+        ansettelsesperiode: Ansettelsesperiode = ansettelsesperiode()
+    ) = Arbeidsforhold(
+        Arbeidsgiver(
             type = "Arbeidsgiver",
             organisasjonsnummer = organisasjonsNummer
         ),
-        ansettelsesperiode = Ansettelsesperiode(
-            periode = AaregPeriode(
-                fom = today.minusYears(1),
-                tom = null
-            )
-        ),
+        ansettelsesperiode = ansettelsesperiode,
         opplysningspliktig = Opplysningspliktig(
             type = "",
             organisasjonsnummer = organisasjonsNummer
@@ -50,35 +112,9 @@ object ProfileringTestData {
         registrert = today.minusDays(1).atStartOfDay()
     )
 
-    val ansattSisteAar = listOf(arbeidsforhold)
-
-    val standardBrukerPersonInfo = PersonInfo(
-        foedselsdato = LocalDate.of(1986, Month.MAY, 1),
-        foedselsAar = 1986,
-        arbeidsforhold = ansattSisteAar
-    )
+    val ansattSisteAar = listOf(arbeidsforhold())
 
     val bruker = Bruker(BrukerType.SYSTEM, identitetsnummer)
-
-    val standardOpplysningerOmArbeidssoeker = OpplysningerOmArbeidssoeker(
-        /* id = */ UUID.randomUUID(),
-        /* periodeId = */ uuid,
-        /* sendtInnAv = */ Metadata(
-            today.toInstant(),
-            bruker,
-            "junit",
-            "unit-test"
-        ),
-        /* utdanning = */ Utdanning(
-            "3",
-            JaNeiVetIkke.JA,
-            JaNeiVetIkke.JA,
-        ),
-        /* helse = */ Helse(JaNeiVetIkke.NEI),
-        /* arbeidserfaring = */ Arbeidserfaring(JaNeiVetIkke.JA),
-        /* jobbsituasjon = */ Jobbsituasjon(emptyList()),
-        /* annet = */ Annet(JaNeiVetIkke.NEI)
-    )
 
     val metadata = Metadata(
         today.minusYears(1).toInstant(),
@@ -94,62 +130,23 @@ object ProfileringTestData {
         null
     )
 
-    val avsluttetPeriode = Periode(
-        uuid,
-        identitetsnummer,
-        metadata,
-        Metadata(
-            today.minusDays(10).toInstant(),
-            bruker,
-            "test",
-            "test"
-        ),
-    )
+    fun utdanning(
+        nus: String = "3",
+        bestaatt: JaNeiVetIkke = JaNeiVetIkke.JA,
+        godkjent: JaNeiVetIkke = JaNeiVetIkke.JA
+    ): Utdanning =
+        Utdanning(nus, bestaatt, godkjent)
 
-    val profilering = Profilering(
-        UUID.randomUUID(),
-        uuid,
-        standardOpplysningerOmArbeidssoeker.id,
-        Metadata(
-            Instant.now(),
-            bruker,
-            "test",
-            "test"
-        ),
-        ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING,
-        false,
-        20
-    )
+    fun helse(helsetilstandHindrerArbeid: JaNeiVetIkke = JaNeiVetIkke.NEI): Helse =
+        Helse(helsetilstandHindrerArbeid)
 
-    val personInfo = PersonInfo(LocalDate.of(1986, 11, 26), 1990, listOf(arbeidsforhold))
+    fun arbeidserfaring(harHattArbeid: JaNeiVetIkke = JaNeiVetIkke.JA): Arbeidserfaring =
+        Arbeidserfaring(harHattArbeid)
 
-    fun standardOpplysninger(sendtInnTidspunkt: Instant = today.toInstant()): OpplysningerOmArbeidssoeker =
-        OpplysningerOmArbeidssoeker(
-            /* id = */ UUID.randomUUID(),
-            /* periodeId = */ uuid,
-            /* sendtInnAv = */ Metadata(
-                sendtInnTidspunkt,
-                bruker,
-                "junit",
-                "unit-test"
-            ),
-            /* utdanning = */ Utdanning(
-                "3",
-                JaNeiVetIkke.JA,
-                JaNeiVetIkke.JA,
-            ),
-            /* helse = */ Helse(JaNeiVetIkke.NEI),
-            /* arbeidserfaring = */ Arbeidserfaring(JaNeiVetIkke.JA),
-            /* jobbsituasjon = */ Jobbsituasjon(emptyList()),
-            /* annet = */ Annet(JaNeiVetIkke.NEI)
-        )
+    fun jobbsituasjon(beskrivelser: List<BeskrivelseMedDetaljer> = emptyList()): Jobbsituasjon =
+        Jobbsituasjon(beskrivelser)
 
-    fun standardOpplysningerOmArbeidssoekerBuilder(): OpplysningerOmArbeidssoeker.Builder =
-        OpplysningerOmArbeidssoeker.newBuilder(standardOpplysningerOmArbeidssoeker)
-
-    fun periodeBuilder(): Periode.Builder = Periode.newBuilder(periode)
-
-    fun metadataBuilder(): Metadata.Builder = Metadata.newBuilder(metadata)
+    fun annet(andreForholdHindrerArbeid: JaNeiVetIkke = JaNeiVetIkke.NEI): Annet = Annet(andreForholdHindrerArbeid)
 
     fun LocalDate.toInstant() = atStartOfDay().toInstant(ZoneOffset.UTC)
 }

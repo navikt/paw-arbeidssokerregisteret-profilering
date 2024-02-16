@@ -31,7 +31,7 @@ class ApplicationTest : FreeSpec({
             )
         val topology = applicationTopology(
             streamBuilder = streamsBuilder,
-            personInfoTjeneste = { _, _ -> ProfileringTestData.personInfo },
+            personInfoTjeneste = { _, _ -> ProfileringTestData.standardBrukerPersonInfo() },
             applicationConfiguration = applicationConfig,
             prometheusRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
         )
@@ -60,14 +60,14 @@ class ApplicationTest : FreeSpec({
         "profileringen skal skrives til output topic når det kommer en periode og opplysninger om arbeidssøker" {
             val key = 1L
             periodeTopic.pipeInput(key, ProfileringTestData.periode)
-            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
+            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger())
             val outputProfilering = profileringsTopic.readValue()
-            outputProfilering.periodeId shouldBe ProfileringTestData.profilering.periodeId
+            outputProfilering.periodeId shouldBe ProfileringTestData.standardProfilering().periodeId
             outputProfilering.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
         }
         "profileringen skal ikke skrives til output topic når det kun kommer opplysninger" {
             val key = 2L
-            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
+            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger())
             profileringsTopic.isEmpty shouldBe true
         }
         "profileringen skal ikke skrives til output topic når det kun kommer periode" {
@@ -78,24 +78,24 @@ class ApplicationTest : FreeSpec({
         "to profileringer skal skrives til output topic når det kommer to opplysninger med samme periode id" {
             val key = 4L
             periodeTopic.pipeInput(key, ProfileringTestData.periode)
-            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
-            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
+            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger())
+            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger())
 
             val outputProfilering1 = profileringsTopic.readValue()
-            outputProfilering1.periodeId shouldBe ProfileringTestData.profilering.periodeId
+            outputProfilering1.periodeId shouldBe ProfileringTestData.standardProfilering().periodeId
             outputProfilering1.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
             periodeTopic.pipeInput(key, ProfileringTestData.periode)
-            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
+            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger())
             val outputProfilering2 = profileringsTopic.readValue()
-            outputProfilering2.periodeId shouldBe ProfileringTestData.profilering.periodeId
+            outputProfilering2.periodeId shouldBe ProfileringTestData.standardProfilering().periodeId
             outputProfilering2.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
         }
         "profileringen skal skrives til output topic når det kommer opplysninger før periode" {
             val key = 5L
-            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
+            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger())
             periodeTopic.pipeInput(key, ProfileringTestData.periode)
             val outputProfilering = profileringsTopic.readValue()
-            outputProfilering.periodeId shouldBe ProfileringTestData.profilering.periodeId
+            outputProfilering.periodeId shouldBe ProfileringTestData.standardProfilering().periodeId
             outputProfilering.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
         }
         /*
