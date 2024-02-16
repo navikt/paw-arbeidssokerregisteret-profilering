@@ -66,7 +66,7 @@ fun main() {
         kafkaStreamsMetrics = KafkaStreamsMetrics(kafkaStreams),
         prometheusRegistry = prometheusMeterRegistry,
         health = health
-    ).start().start(true)
+    ).start(true)
     logger.info("Applikasjon stoppet")
 }
 
