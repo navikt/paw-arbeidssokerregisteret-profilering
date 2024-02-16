@@ -15,6 +15,7 @@ import no.nav.paw.config.hoplite.loadNaisOrLocalConfiguration
 import no.nav.paw.config.kafka.KAFKA_CONFIG_WITH_SCHEME_REG
 import no.nav.paw.config.kafka.KafkaConfig
 import no.nav.paw.config.kafka.streams.KafkaStreamsFactory
+import okhttp3.internal.wait
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.common.serialization.Serdes.LongSerde
 import org.apache.kafka.streams.KafkaStreams
@@ -60,12 +61,12 @@ fun main() {
 
     val health = Health(kafkaStreams)
 
+    logger.info("Applikasjon startet")
     initKtor(
         kafkaStreamsMetrics = KafkaStreamsMetrics(kafkaStreams),
         prometheusRegistry = prometheusMeterRegistry,
         health = health
-    ).start(wait = true)
-
-    logger.info("Applikasjon startet")
+    ).start(true)
+    logger.info("Applikasjon stoppet")
 }
 

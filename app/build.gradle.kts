@@ -82,6 +82,12 @@ ktor {
     }
 }
 
+tasks.named("compileKotlin", org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask::class.java) {
+    compilerOptions {
+        freeCompilerArgs.add("-Xcontext-receivers")
+    }
+}
+
 application {
     mainClass.set("no.nav.paw.arbeidssokerregisteret.profilering.StartupKt")
 }
