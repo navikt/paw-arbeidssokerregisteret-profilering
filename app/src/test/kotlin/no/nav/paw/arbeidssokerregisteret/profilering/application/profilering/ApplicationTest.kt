@@ -17,12 +17,15 @@ import no.nav.paw.arbeidssokerregisteret.profilering.application.compositeKey
 import no.nav.paw.arbeidssokerregisteret.profilering.application.profilering.ProfileringTestData.toInstant
 import no.nav.paw.config.hoplite.loadNaisOrLocalConfiguration
 import org.apache.kafka.common.serialization.Serdes
+import org.apache.kafka.streams.KeyValue
 import org.apache.kafka.streams.StreamsBuilder
+import org.apache.kafka.streams.TestOutputTopic
 import org.apache.kafka.streams.TopologyTestDriver
 import org.apache.kafka.streams.state.Stores
 import java.time.Instant
 import java.time.LocalDate
 import java.util.*
+import kotlin.test.fail
 
 class ApplicationTest : FreeSpec({
     "Enkle profilerings tester" - {
@@ -30,7 +33,7 @@ class ApplicationTest : FreeSpec({
         val streamsBuilder = StreamsBuilder()
             .addStateStore(
                 Stores.keyValueStoreBuilder(
-                    Stores.persistentKeyValueStore(applicationConfig.joiningStateStoreName),
+                    Stores.inMemoryKeyValueStore(applicationConfig.joiningStateStoreName),
                     Serdes.String(),
                     createAvroSerde()
                 )
@@ -70,75 +73,61 @@ class ApplicationTest : FreeSpec({
             val outputProfilering = profileringsTopic.readValue()
             outputProfilering.periodeId shouldBe ProfileringTestData.profilering.periodeId
             outputProfilering.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
+            verifyEmptyTopic(profileringsTopic)
         }
         "profileringen skal ikke skrives til output topic når det kun kommer opplysninger" {
             val key = 2L
             opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
-            profileringsTopic.isEmpty shouldBe true
+            verifyEmptyTopic(profileringsTopic)
         }
         "profileringen skal ikke skrives til output topic når det kun kommer periode" {
             val key = 3L
             periodeTopic.pipeInput(key, ProfileringTestData.periode)
-            profileringsTopic.isEmpty shouldBe true
+            verifyEmptyTopic(profileringsTopic)
         }
         "to profileringer skal skrives til output topic når det kommer to opplysninger med samme periode id" {
+            verifyEmptyTopic(profileringsTopic)
             val key = 4L
             periodeTopic.pipeInput(key, ProfileringTestData.periode)
             opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
             opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
 
-            val outputProfilering1 = profileringsTopic.readValue()
+            val (recordKey1, outputProfilering1) = profileringsTopic.readKeyValue()
+            recordKey1 shouldBe key
             outputProfilering1.periodeId shouldBe ProfileringTestData.profilering.periodeId
             outputProfilering1.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
             periodeTopic.pipeInput(key, ProfileringTestData.periode)
-            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
-            val outputProfilering2 = profileringsTopic.readValue()
+            val (recordKey2, outputProfilering2) = profileringsTopic.readKeyValue()
+            recordKey2 shouldBe key
             outputProfilering2.periodeId shouldBe ProfileringTestData.profilering.periodeId
             outputProfilering2.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
+            verifyEmptyTopic(profileringsTopic)
         }
         "profileringen skal skrives til output topic når det kommer opplysninger før periode" {
+            verifyEmptyTopic(profileringsTopic)
             val key = 5L
             opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
+            verifyEmptyTopic(profileringsTopic)
             periodeTopic.pipeInput(key, ProfileringTestData.periode)
-            val outputProfilering = profileringsTopic.readValue()
+            val (recordKey, outputProfilering) = profileringsTopic.readKeyValue()
+            recordKey shouldBe key
             outputProfilering.periodeId shouldBe ProfileringTestData.profilering.periodeId
             outputProfilering.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
-        }
-        /*
-    "scheduleCleanup skal slette utdaterte records fra state store" {
-        val key = 6L
-        periodeTopic.pipeInput(key, ProfileringTestData.avsluttetPeriode, Instant.now())
-        val compositeKey = compositeKey(key, ProfileringTestData.avsluttetPeriode.id)
-
-        testDriver
-            .getKeyValueStore<String, TopicsJoin>(applicationConfig.joiningStateStoreName)
-            .get(compositeKey) shouldBe null
-
-        opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
-
-        profileringsTopic.isEmpty shouldBe true
-    }
-    "scheduleCleanup skal slette dinglende opplysninger fra state store" {
-        val key = 7L
-        opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData
-            .standardOpplysninger(LocalDate.now().minusYears(1).toInstant())
-        )
-
-        periodeTopic.pipeInput(key, ProfileringTestData.periode, Instant.now())
-
-        profileringsTopic.isEmpty shouldBe true
-    }
-    */
-        "når opplysninger kommer først, og perioden etterpå, skal det profileres" {
-            val key = 8L
-            opplysningerOmArbeidssoekerTopic.pipeInput(
-                key, ProfileringTestData
-                    .standardOpplysninger(Instant.now())
-            )
-
-            periodeTopic.pipeInput(key, ProfileringTestData.periode, Instant.now())
-
-            profileringsTopic.isEmpty shouldBe false
+            verifyEmptyTopic(profileringsTopic)
         }
     }
 })
+
+fun verifyEmptyTopic(profileringsTopic: TestOutputTopic<out Any, out Any>) {
+    if (profileringsTopic.isEmpty) return
+    val records = profileringsTopic.readKeyValuesToList()
+        .map { it.key to it.value }
+    fail(
+        "Forventet at topic ${profileringsTopic} skulle være tom, følgende records ble funnet:\n ${
+            records.toList().map { "$it\n" }
+        }"
+    )
+}
+
+operator fun <K, V> KeyValue<K, V>.component1(): K = key
+operator fun <K, V> KeyValue<K, V>.component2(): V = value
