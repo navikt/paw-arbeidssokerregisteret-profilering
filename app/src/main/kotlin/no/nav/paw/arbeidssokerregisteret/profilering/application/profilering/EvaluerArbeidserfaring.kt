@@ -19,7 +19,10 @@ fun evaluerArbeidsErfaring(
     )
     return when {
         sammenhengendeJobber == null -> emptySet()
-        sammenhengendeJobber.tid.length().days >= minimumsArbeidserfaring.days -> setOf(
+        periodComparator.compare(
+            sammenhengendeJobber.periodeInnenfor(periode).length(),
+            minimumsArbeidserfaring
+        ) >= 0 -> setOf(
             OPPFYLLER_KRAV_TIL_ARBEIDSERFARING
         )
         else -> emptySet()
@@ -33,11 +36,23 @@ fun lengsteSammenhengendeInnenforPeriode(
 ): SammhengendeJobb? =
     arbeidsforhold.flettSammenhengendeJobber(marginForSammenhengendeJobbDager)
         .filter { sammenhengendePeriode ->
-            (sammenhengendePeriode.tid.start <= periode.start &&
-                    sammenhengendePeriode.tid.endExclusive >= periode.start) ||
-                    (sammenhengendePeriode.tid.start <= periode.endExclusive &&
-                            sammenhengendePeriode.tid.endExclusive >= periode.endExclusive)
-        }.maxByOrNull { it.periodeInnenfor(periode).length().days }
+            val range = sammenhengendePeriode.tid
+            periode.contains(range.start) || periode.contains(range.endExclusive)
+        }.maxWithOrNull(sammhengendeJobbLengdeComperator(periode))
+
+fun sammhengendeJobbLengdeComperator(innenForPeriode: OpenEndRange<LocalDate>) = Comparator<SammhengendeJobb> { o1, o2 ->
+    val length1 = o1.periodeInnenfor(innenForPeriode).length()
+    val length2 = o2.periodeInnenfor(innenForPeriode).length()
+    periodComparator.compare(length1, length2)
+}
+
+val periodComparator = Comparator<Period> { o1, o2 ->
+    when {
+        o1.years != o2.years -> o1.years.compareTo(o2.years)
+        o1.months != o2.months -> o1.months.compareTo(o2.months)
+        else -> o1.days.compareTo(o2.days)
+    }
+}
 
 fun SammhengendeJobb.periodeInnenfor(periode: OpenEndRange<LocalDate>): OpenEndRange<LocalDate> =
     maxOf(tid.start, periode.start).rangeUntil(minOf(tid.endExclusive, periode.endExclusive))

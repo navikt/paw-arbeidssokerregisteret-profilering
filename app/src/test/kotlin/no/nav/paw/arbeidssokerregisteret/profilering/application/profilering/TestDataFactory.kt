@@ -4,8 +4,11 @@ import no.nav.paw.arbeidssokerregisteret.api.v1.*
 import no.nav.paw.arbeidssokerregisteret.api.v1.Metadata
 import no.nav.paw.arbeidssokerregisteret.api.v3.OpplysningerOmArbeidssoeker
 import no.nav.paw.arbeidssokerregisteret.api.v3.Utdanning
+import java.time.Duration
 import no.nav.paw.arbeidssokerregisteret.api.v1.Metadata as ApiMetadata
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
 import java.util.*
 
 
@@ -16,6 +19,25 @@ fun periode(
     avsluttet: ApiMetadata? = null
 ) = Periode(id, identitetsnummer, startet, avsluttet)
 
+fun opplysninger(
+    id: UUID = UUID.randomUUID(),
+    periodeId: UUID = UUID.randomUUID(),
+    sendtIn: String = "2020-01-28",
+    utdanning: Utdanning = utdanning(),
+    helseHindrerArbeid: JaNeiVetIkke = JaNeiVetIkke.NEI,
+    arbeidserfaring: Arbeidserfaring = arbeidserfaring(),
+    jobbsituasjon: Jobbsituasjon = jobbsituasjon(),
+    annetHindrerArbeid: JaNeiVetIkke = JaNeiVetIkke.NEI
+) = OpplysningerOmArbeidssoeker(
+    id,
+    periodeId,
+    metadata(LocalDate.parse(sendtIn).atStartOfDay().toInstant(ZoneOffset.UTC) + Duration.ofHours(6)),
+    utdanning,
+    helse(helseHindrerArbeid),
+    arbeidserfaring,
+    jobbsituasjon,
+    annet(annetHindrerArbeid)
+)
 fun opplysninger(
     id: UUID = UUID.randomUUID(),
     periodeId: UUID = UUID.randomUUID(),
@@ -38,9 +60,9 @@ fun opplysninger(
 
 fun utdanning(
     utdanning: String = "3",
-    utdanningGodkjent: JaNeiVetIkke = JaNeiVetIkke.JA,
-    utdanningBestatt: JaNeiVetIkke = JaNeiVetIkke.JA
-) = Utdanning(utdanning, utdanningGodkjent, utdanningBestatt)
+    godkjent: JaNeiVetIkke = JaNeiVetIkke.JA,
+    bestaatt: JaNeiVetIkke = JaNeiVetIkke.JA
+) = Utdanning(utdanning, godkjent, bestaatt)
 
 fun helse(
     helseHinder: JaNeiVetIkke = JaNeiVetIkke.NEI
