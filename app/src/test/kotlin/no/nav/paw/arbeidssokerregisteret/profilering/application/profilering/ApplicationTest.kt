@@ -1,6 +1,7 @@
 package no.nav.paw.arbeidssokerregisteret.profilering.application.profilering
 
 import io.kotest.core.spec.style.FreeSpec
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
@@ -21,7 +22,9 @@ import org.apache.kafka.streams.KeyValue
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.TestOutputTopic
 import org.apache.kafka.streams.TopologyTestDriver
+import org.apache.kafka.streams.state.KeyValueStore
 import org.apache.kafka.streams.state.Stores
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.util.*
@@ -114,6 +117,52 @@ class ApplicationTest : FreeSpec({
             outputProfilering.periodeId shouldBe ProfileringTestData.profilering.periodeId
             outputProfilering.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
             verifyEmptyTopic(profileringsTopic)
+        }
+        "Verifiserer flyt for, opplysning -> start-periode -> avslutt-periode" {
+            verifyEmptyTopic(profileringsTopic)
+            val key = 6L
+            val startTime = Instant.now()
+            val opplysninger = opplysninger(
+                sendtInAv = metadata(tidspunkt = startTime)
+            )
+            opplysningerOmArbeidssoekerTopic.pipeInput(
+                key,
+                opplysninger,
+                opplysninger.sendtInnAv.tidspunkt
+            )
+            val startPeriode = periode(
+                id = opplysninger.periodeId,
+                startet = metadata(tidspunkt = startTime + Duration.ofMillis(513))
+            )
+            periodeTopic.pipeInput(
+                key,
+                startPeriode,
+                startPeriode.startet.tidspunkt
+            )
+            val avsluttPeriode = periode(
+                id = startPeriode.id,
+                identitetsnummer = startPeriode.identitetsnummer,
+                startet = startPeriode.startet,
+                avsluttet = metadata(tidspunkt = startPeriode.startet.tidspunkt + Duration.ofDays(14))
+            )
+            periodeTopic.pipeInput(
+                key,
+                avsluttPeriode,
+                avsluttPeriode.avsluttet!!.tidspunkt
+            )
+            profileringsTopic.isEmpty shouldBe false
+            val testRecord1 = profileringsTopic.readRecord()
+            testRecord1.key shouldBe key
+            Instant.ofEpochMilli(testRecord1.timestamp()) shouldBe startPeriode.startet.tidspunkt
+            verifyEmptyTopic(profileringsTopic)
+            val keyValueStore: KeyValueStore<String, TopicsJoin> = testDriver.getKeyValueStore(
+                applicationConfig.joiningStateStoreName
+            )
+            val topicsJoin = keyValueStore["${key}:${opplysninger.periodeId}"]
+            topicsJoin.shouldNotBeNull()
+            topicsJoin.opplysningerOmArbeidssoeker shouldBe null
+            topicsJoin.periode shouldBe avsluttPeriode
+            topicsJoin.profilering shouldBe null
         }
     }
 })
