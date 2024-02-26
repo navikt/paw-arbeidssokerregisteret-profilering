@@ -5,6 +5,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
+import no.nav.paw.arbeidssokerregisteret.api.helpers.v3.TopicsJoin
 import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
 import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
 import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
@@ -22,8 +23,6 @@ import org.apache.kafka.streams.state.KeyValueStore
 import org.apache.kafka.streams.state.Stores
 import java.time.Duration
 import java.time.Instant
-import java.time.LocalDate
-import java.util.*
 import kotlin.test.fail
 
 class ApplicationTest : FreeSpec({
@@ -96,10 +95,9 @@ class ApplicationTest : FreeSpec({
             outputProfilering1.periodeId shouldBe ProfileringTestData.standardProfilering().periodeId
             outputProfilering1.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
             periodeTopic.pipeInput(key, ProfileringTestData.periode)
-            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger())
             val (recordKey2, outputProfilering2) = profileringsTopic.readKeyValue()
             recordKey2 shouldBe key
-            outputProfilering2.periodeId shouldBe ProfileringTestData.profilering.periodeId
+            outputProfilering2.periodeId shouldBe ProfileringTestData.standardProfilering().periodeId
             outputProfilering2.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
             verifyEmptyTopic(profileringsTopic)
         }
@@ -169,7 +167,7 @@ fun verifyEmptyTopic(profileringsTopic: TestOutputTopic<out Any, out Any>) {
     val records = profileringsTopic.readKeyValuesToList()
         .map { it.key to it.value }
     fail(
-        "Forventet at topic ${profileringsTopic} skulle være tom, følgende records ble funnet:\n ${
+        "Forventet at topic $profileringsTopic skulle være tom, følgende records ble funnet:\n ${
             records.toList().map { "$it\n" }
         }"
     )

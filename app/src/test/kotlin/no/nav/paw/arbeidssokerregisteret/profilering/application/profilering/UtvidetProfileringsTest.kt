@@ -3,14 +3,11 @@ package no.nav.paw.arbeidssokerregisteret.profilering.application.profilering
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.data.Row6
 import io.kotest.data.row
-import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.paw.arbeidssokerregisteret.api.v1.JaNeiVetIkke
 import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
 import no.nav.paw.arbeidssokerregisteret.api.v3.OpplysningerOmArbeidssoeker
-import no.nav.paw.arbeidssokerregisteret.profilering.application.profilering.ProfileringTestData.profilering
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfo
-import java.time.ZoneId
 
 class UtvidetProfileringsTest : FreeSpec({
     "Profilering" - {
@@ -90,7 +87,6 @@ class UtvidetProfileringsTest : FreeSpec({
         }
     }
 })
-
 
 fun test(
     beskrivelse: String,
