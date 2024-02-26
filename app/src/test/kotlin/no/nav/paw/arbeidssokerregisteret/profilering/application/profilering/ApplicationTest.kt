@@ -5,8 +5,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
-import no.nav.paw.arbeidssokerregisteret.api.helpers.v3.TopicsJoin
-import no.nav.paw.arbeidssokerregisteret.api.v1.Metadata
 import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
 import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
 import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
@@ -14,8 +12,6 @@ import no.nav.paw.arbeidssokerregisteret.api.v3.OpplysningerOmArbeidssoeker
 import no.nav.paw.arbeidssokerregisteret.profilering.application.APPLICATION_CONFIG_FILE
 import no.nav.paw.arbeidssokerregisteret.profilering.application.ApplicationConfiguration
 import no.nav.paw.arbeidssokerregisteret.profilering.application.applicationTopology
-import no.nav.paw.arbeidssokerregisteret.profilering.application.compositeKey
-import no.nav.paw.arbeidssokerregisteret.profilering.application.profilering.ProfileringTestData.toInstant
 import no.nav.paw.config.hoplite.loadNaisOrLocalConfiguration
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.KeyValue
@@ -43,7 +39,7 @@ class ApplicationTest : FreeSpec({
             )
         val topology = applicationTopology(
             streamBuilder = streamsBuilder,
-            personInfoTjeneste = { _, _ -> ProfileringTestData.personInfo },
+            personInfoTjeneste = { _, _ -> ProfileringTestData.standardBrukerPersonInfo() },
             applicationConfiguration = applicationConfig,
             prometheusRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
         )
@@ -72,15 +68,15 @@ class ApplicationTest : FreeSpec({
         "profileringen skal skrives til output topic når det kommer en periode og opplysninger om arbeidssøker" {
             val key = 1L
             periodeTopic.pipeInput(key, ProfileringTestData.periode)
-            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
+            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger())
             val outputProfilering = profileringsTopic.readValue()
-            outputProfilering.periodeId shouldBe ProfileringTestData.profilering.periodeId
+            outputProfilering.periodeId shouldBe ProfileringTestData.standardProfilering().periodeId
             outputProfilering.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
             verifyEmptyTopic(profileringsTopic)
         }
         "profileringen skal ikke skrives til output topic når det kun kommer opplysninger" {
             val key = 2L
-            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
+            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger())
             verifyEmptyTopic(profileringsTopic)
         }
         "profileringen skal ikke skrives til output topic når det kun kommer periode" {
@@ -92,14 +88,15 @@ class ApplicationTest : FreeSpec({
             verifyEmptyTopic(profileringsTopic)
             val key = 4L
             periodeTopic.pipeInput(key, ProfileringTestData.periode)
-            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
-            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
+            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger())
+            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger())
 
             val (recordKey1, outputProfilering1) = profileringsTopic.readKeyValue()
             recordKey1 shouldBe key
-            outputProfilering1.periodeId shouldBe ProfileringTestData.profilering.periodeId
+            outputProfilering1.periodeId shouldBe ProfileringTestData.standardProfilering().periodeId
             outputProfilering1.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
             periodeTopic.pipeInput(key, ProfileringTestData.periode)
+            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger())
             val (recordKey2, outputProfilering2) = profileringsTopic.readKeyValue()
             recordKey2 shouldBe key
             outputProfilering2.periodeId shouldBe ProfileringTestData.profilering.periodeId
@@ -109,12 +106,12 @@ class ApplicationTest : FreeSpec({
         "profileringen skal skrives til output topic når det kommer opplysninger før periode" {
             verifyEmptyTopic(profileringsTopic)
             val key = 5L
-            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysningerOmArbeidssoeker)
+            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger())
             verifyEmptyTopic(profileringsTopic)
             periodeTopic.pipeInput(key, ProfileringTestData.periode)
             val (recordKey, outputProfilering) = profileringsTopic.readKeyValue()
             recordKey shouldBe key
-            outputProfilering.periodeId shouldBe ProfileringTestData.profilering.periodeId
+            outputProfilering.periodeId shouldBe ProfileringTestData.standardProfilering().periodeId
             outputProfilering.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
             verifyEmptyTopic(profileringsTopic)
         }

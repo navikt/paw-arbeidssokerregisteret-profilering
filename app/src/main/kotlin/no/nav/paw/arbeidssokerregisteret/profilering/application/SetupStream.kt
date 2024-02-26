@@ -1,0 +1,36 @@
+package no.nav.paw.arbeidssokerregisteret.profilering.application
+
+import io.micrometer.prometheus.PrometheusMeterRegistry
+import no.nav.paw.arbeidssokerregisteret.api.helpers.v3.TopicsJoin
+import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
+import no.nav.paw.arbeidssokerregisteret.api.v3.OpplysningerOmArbeidssoeker
+import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoTjeneste
+import org.apache.kafka.streams.StreamsBuilder
+import kotlin.reflect.KClass
+
+class SetupStreams(
+    val streamBuilder: StreamsBuilder,
+    val personInfoTjeneste: PersonInfoTjeneste,
+    val applicationConfiguration: ApplicationConfiguration,
+    val prometheusRegistry: PrometheusMeterRegistry
+) {
+    inline fun <reified T> setupStream(
+        topic: String,
+        stateStoreSaveClass: KClass<out BaseStateStoreSave>
+    ) {
+        streamBuilder
+            .stream<Long, T>(topic)
+            .mapValues { _, value -> TopicsJoin(value as? Periode, null, value as? OpplysningerOmArbeidssoeker) }
+            .saveAndForwardIfComplete(
+                stateStoreSaveClass,
+                applicationConfiguration.joiningStateStoreName,
+                prometheusRegistry
+            )
+            .filterProfileAndForward(
+                personInfoTjeneste,
+                applicationConfiguration,
+                prometheusRegistry
+
+            )
+    }
+}

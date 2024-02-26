@@ -2,8 +2,6 @@ package no.nav.paw.arbeidssokerregisteret.profilering.application.profilering
 
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.matchers.shouldBe
-import no.nav.paw.aareg.Ansettelsesperiode
-import no.nav.paw.aareg.Periode
 import java.time.LocalDate
 import java.time.Period
 
@@ -13,7 +11,7 @@ class EvaluerArbeidserfaringKtTest : StringSpec({
         val marginForSammenhengendeJobb = 3
         val minimumsArbeidserfaring = Period.ofMonths(6)
         val periode = LocalDate.now().minusMonths(12)..<LocalDate.now()
-        val arbeidsforhold = ProfileringTestData.arbeidsforhold
+        val arbeidsforhold = ProfileringTestData.arbeidsforhold()
 
         val result =
             evaluerArbeidsErfaring(
@@ -31,14 +29,12 @@ class EvaluerArbeidserfaringKtTest : StringSpec({
                 val marginForSammenhengendeJobb = 3
                 val minimumsArbeidserfaring = Period.ofMonths(6)
                 val periode = LocalDate.now().minusMonths(12)..<LocalDate.now()
-                val arbeidsforhold = ProfileringTestData.arbeidsforhold.copy(
-                    ansettelsesperiode = Ansettelsesperiode(
-                        periode = Periode(
+                val arbeidsforhold = ProfileringTestData.arbeidsforhold(
+                    ansettelsesperiode = ProfileringTestData.ansettelsesperiode(
                             fom = LocalDate.now().minusMonths(7),
                             tom = LocalDate.now()
                         )
-                    ),
-                )
+                    )
 
                 val result =
                     evaluerArbeidsErfaring(
@@ -55,20 +51,16 @@ class EvaluerArbeidserfaringKtTest : StringSpec({
         val marginForSammenhengendeJobb = 3
         val minimumsArbeidserfaring = Period.ofMonths(6)
         val periode = LocalDate.now().minusMonths(12)..<LocalDate.now()
-        val arbeidsforhold1 = ProfileringTestData.arbeidsforhold.copy(
-            ansettelsesperiode = Ansettelsesperiode(
-                periode = Periode(
-                    fom = LocalDate.now().minusMonths(12),
-                    tom = LocalDate.now().minusMonths(7)
-                )
+        val arbeidsforhold1 = ProfileringTestData.arbeidsforhold(
+            ansettelsesperiode = ProfileringTestData.ansettelsesperiode(
+                fom = LocalDate.now().minusMonths(12),
+                tom = LocalDate.now().minusMonths(7)
             )
         )
-        val arbeidsforhold2 = ProfileringTestData.arbeidsforhold.copy(
-            ansettelsesperiode = Ansettelsesperiode(
-                periode = Periode(
-                    fom = LocalDate.now().minusMonths(7).plusDays(1),
-                    tom = LocalDate.now().minusMonths(3)
-                )
+        val arbeidsforhold2 = ProfileringTestData.arbeidsforhold(
+            ansettelsesperiode = ProfileringTestData.ansettelsesperiode(
+                fom = LocalDate.now().minusMonths(7).plusDays(1),
+                tom = LocalDate.now().minusMonths(3)
             )
         )
 

@@ -13,75 +13,63 @@ class ProfileringKtTest : FreeSpec({
     "En med alder på 61 år skal gi ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING}" {
         val sekstiEnAarSiden = LocalDate.now().minusYears(61)
         profiler(
-            ProfileringTestData.standardBrukerPersonInfo.copy(
+            ProfileringTestData.standardBrukerPersonInfo(
                 foedselsdato = sekstiEnAarSiden,
                 foedselsAar = sekstiEnAarSiden.year
             ),
-            opplysninger = ProfileringTestData.standardOpplysningerOmArbeidssoeker
+            opplysninger = ProfileringTestData.standardOpplysninger()
         ).profilertTil shouldBe ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
     }
     "En med alder på 17 år skal gi ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING}" {
         val syttenAarSiden = LocalDate.now().minusYears(17)
         profiler(
-            ProfileringTestData.standardBrukerPersonInfo.copy(
+            ProfileringTestData.standardBrukerPersonInfo(
                 foedselsdato = syttenAarSiden,
                 foedselsAar = syttenAarSiden.year
             ),
-            opplysninger = ProfileringTestData.standardOpplysningerOmArbeidssoeker
+            opplysninger = ProfileringTestData.standardOpplysninger()
         ).profilertTil shouldBe ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
     }
     "En med alder innenfor 18..59 og oppfyller krav til arbeidserfaring, utdanning, helsehinder og andre forhold blir profilert til ${ProfilertTil.ANTATT_GODE_MULIGHETER}" {
         profiler(
-            ProfileringTestData.standardBrukerPersonInfo,
-            ProfileringTestData.standardOpplysningerOmArbeidssoeker
+            ProfileringTestData.standardBrukerPersonInfo(),
+            ProfileringTestData.standardOpplysninger()
         ).profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
     }
     "En med 'helsehinder' skal gi ${ProfilertTil.OPPGITT_HINDRINGER}" {
         profiler(
-            ProfileringTestData.standardBrukerPersonInfo,
-            ProfileringTestData.standardOpplysningerOmArbeidssoekerBuilder()
-                .setHelse(Helse(JaNeiVetIkke.JA))
-                .build()
+            ProfileringTestData.standardBrukerPersonInfo(),
+            ProfileringTestData.standardOpplysninger(helse = Helse(JaNeiVetIkke.JA))
         ).profilertTil shouldBe ProfilertTil.OPPGITT_HINDRINGER
     }
     "En med 'andre forhold' skal gi ${ProfilertTil.OPPGITT_HINDRINGER}" {
         profiler(
-            ProfileringTestData.standardBrukerPersonInfo,
-            ProfileringTestData.standardOpplysningerOmArbeidssoekerBuilder()
-                .setAnnet(Annet(JaNeiVetIkke.JA))
-                .build()
+            ProfileringTestData.standardBrukerPersonInfo(),
+            ProfileringTestData.standardOpplysninger(annet = Annet(JaNeiVetIkke.JA))
         ).profilertTil shouldBe ProfilertTil.OPPGITT_HINDRINGER
     }
     "En med 'utdanning bestaatt = nei' skal gi ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING}" {
         profiler(
-            ProfileringTestData.standardBrukerPersonInfo,
-            ProfileringTestData.standardOpplysningerOmArbeidssoekerBuilder()
-                .setUtdanning(Utdanning("1", JaNeiVetIkke.NEI, JaNeiVetIkke.JA))
-                .build()
+            ProfileringTestData.standardBrukerPersonInfo(),
+            ProfileringTestData.standardOpplysninger(utdanning = Utdanning("1", JaNeiVetIkke.NEI, JaNeiVetIkke.JA))
         ).profilertTil shouldBe ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
     }
     "En med 'utdanning godkjent = nei' skal gi ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING}" {
         profiler(
-            ProfileringTestData.standardBrukerPersonInfo,
-            ProfileringTestData.standardOpplysningerOmArbeidssoekerBuilder()
-                .setUtdanning(Utdanning("1", JaNeiVetIkke.JA, JaNeiVetIkke.NEI))
-                .build()
+            ProfileringTestData.standardBrukerPersonInfo(),
+            ProfileringTestData.standardOpplysninger(utdanning = Utdanning("1", JaNeiVetIkke.JA, JaNeiVetIkke.NEI))
         ).profilertTil shouldBe ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
     }
     "En med 'nus = 0' skal gi ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING}" {
         profiler(
-            ProfileringTestData.standardBrukerPersonInfo,
-            ProfileringTestData.standardOpplysningerOmArbeidssoekerBuilder()
-                .setUtdanning(Utdanning("0", JaNeiVetIkke.JA, JaNeiVetIkke.JA))
-                .build()
+            ProfileringTestData.standardBrukerPersonInfo(),
+            ProfileringTestData.standardOpplysninger(utdanning = Utdanning("0", JaNeiVetIkke.JA, JaNeiVetIkke.JA))
         ).profilertTil shouldBe ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
     }
     "En med 'nus = 9' skal gi ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING}" {
         profiler(
-            ProfileringTestData.standardBrukerPersonInfo,
-            ProfileringTestData.standardOpplysningerOmArbeidssoekerBuilder()
-                .setUtdanning(Utdanning("0", JaNeiVetIkke.JA, JaNeiVetIkke.JA))
-                .build()
+            ProfileringTestData.standardBrukerPersonInfo(),
+            ProfileringTestData.standardOpplysninger(utdanning = Utdanning("9", JaNeiVetIkke.JA, JaNeiVetIkke.JA))
         ).profilertTil shouldBe ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
     }
 })
