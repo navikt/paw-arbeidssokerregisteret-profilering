@@ -73,7 +73,7 @@ class ProfileringKtTest : FreeSpec({
             ProfileringTestData.standardOpplysninger(utdanning = Utdanning("9", JaNeiVetIkke.JA, JaNeiVetIkke.JA))
         ).profilertTil shouldBe ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
     }
-    "En med 'kilde = veilarbregistrering' skal gi ${ProfilertTil.ANTATT_GODE_MULIGHETER}" {
+    "En med 'kilde = veilarbregistrering' og 6 mnd sammenhengende jobb skal gi ${ProfilertTil.ANTATT_GODE_MULIGHETER}" {
         val sendtInnTidspunkt = LocalDate.of(2020, 3, 16).toInstant()
         profiler(
             ProfileringTestData.standardBrukerPersonInfo(
@@ -84,7 +84,7 @@ class ProfileringKtTest : FreeSpec({
             ProfileringTestData.standardOpplysninger(sendtInnTidspunkt = sendtInnTidspunkt, kilde = "veilarbregistrering")
         ).profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
     }
-    "En med 'kilde = veilarbregistrering' skal gi ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING} hvis bruker ikke har nok arbeidserfaring" {
+    "En med 'kilde = veilarbregistrering' og under 6 mnd sammenhengende jobb skal gi ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING}" {
         val sendtInnTidspunkt = LocalDate.of(2020, 3, 16).toInstant()
         profiler(
             ProfileringTestData.standardBrukerPersonInfo(
