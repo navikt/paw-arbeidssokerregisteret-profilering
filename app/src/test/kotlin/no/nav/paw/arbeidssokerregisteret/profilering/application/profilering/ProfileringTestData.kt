@@ -49,7 +49,8 @@ object ProfileringTestData {
         helse: Helse = helse(),
         arbeidserfaring: Arbeidserfaring = arbeidserfaring(),
         jobbsituasjon: Jobbsituasjon = jobbsituasjon(),
-        annet: Annet = annet()
+        annet: Annet = annet(),
+        kilde: String = "junit"
     ): OpplysningerOmArbeidssoeker =
         OpplysningerOmArbeidssoeker(
             UUID.randomUUID(),
@@ -57,7 +58,7 @@ object ProfileringTestData {
             Metadata(
                 sendtInnTidspunkt,
                 bruker,
-                "junit",
+                kilde,
                 "unit-test"
             ),
             utdanning,

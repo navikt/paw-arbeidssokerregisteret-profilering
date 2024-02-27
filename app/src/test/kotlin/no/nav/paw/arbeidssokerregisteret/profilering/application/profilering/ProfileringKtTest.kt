@@ -7,6 +7,7 @@ import no.nav.paw.arbeidssokerregisteret.api.v1.Helse
 import no.nav.paw.arbeidssokerregisteret.api.v1.JaNeiVetIkke
 import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
 import no.nav.paw.arbeidssokerregisteret.api.v3.Utdanning
+import no.nav.paw.arbeidssokerregisteret.profilering.application.profilering.ProfileringTestData.toInstant
 import java.time.LocalDate
 
 class ProfileringKtTest : FreeSpec({
@@ -70,6 +71,28 @@ class ProfileringKtTest : FreeSpec({
         profiler(
             ProfileringTestData.standardBrukerPersonInfo(),
             ProfileringTestData.standardOpplysninger(utdanning = Utdanning("9", JaNeiVetIkke.JA, JaNeiVetIkke.JA))
+        ).profilertTil shouldBe ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
+    }
+    "En med 'kilde = veilarbregistrering' skal gi ${ProfilertTil.ANTATT_GODE_MULIGHETER}" {
+        val sendtInnTidspunkt = LocalDate.of(2020, 3, 16).toInstant()
+        profiler(
+            ProfileringTestData.standardBrukerPersonInfo(
+                arbeidsforhold = listOf(
+                    arbeidsforhold(fra = "2019-09-15", til = "2020-03-15")
+                )
+            ),
+            ProfileringTestData.standardOpplysninger(sendtInnTidspunkt = sendtInnTidspunkt, kilde = "veilarbregistrering")
+        ).profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
+    }
+    "En med 'kilde = veilarbregistrering' skal gi ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING} hvis bruker ikke har nok arbeidserfaring" {
+        val sendtInnTidspunkt = LocalDate.of(2020, 3, 16).toInstant()
+        profiler(
+            ProfileringTestData.standardBrukerPersonInfo(
+                arbeidsforhold = listOf(
+                    arbeidsforhold(fra = "2020-01-01", til = "2020-03-15")
+                )
+            ),
+            ProfileringTestData.standardOpplysninger(sendtInnTidspunkt = sendtInnTidspunkt, kilde = "veilarbregistrering")
         ).profilertTil shouldBe ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
     }
 })

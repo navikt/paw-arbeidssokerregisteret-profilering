@@ -5,6 +5,7 @@ import no.nav.paw.arbeidssokerregisteret.profilering.application.profilering.Pro
 import java.time.LocalDate
 import java.time.Period
 import java.time.temporal.ChronoUnit
+import kotlin.Comparator
 
 fun evaluerArbeidsErfaring(
     marginForSammenhengendeJobbDager: Int,

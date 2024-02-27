@@ -23,12 +23,18 @@ fun profiler(
                 evaluerAlder(alder) +
                 evaluerHelse(opplysninger.helse) +
                 evaluerUtdanning(opplysninger.utdanning) +
-                evaluerArbeidsErfaring(
+                if (opplysninger.sendtInnAv.kilde == "veilarbregistrering")
+                    veilarbHarJobbetSammenhengendeSeksAvTolvSisteManeder(
+                        sendtInnDato,
+                        personInfo.arbeidsforhold,
+                    )
+                else evaluerArbeidsErfaring(
                     MARGIN_FOR_SAMMENHENGENDE_JOBB_DAGER,
                     Period.ofMonths(MINIMUM_SAMMENHENGENDE_JOBB_MND),
                     sendtInnDato.minusYears(LENGDE_PAA_PERIODE_SOM_SKAL_SJEKKES_AAR)..<sendtInnDato,
                     personInfo.arbeidsforhold
                 )
+
 
     fun resultat(profilering: ProfilertTil) =
         profileringsResultat(

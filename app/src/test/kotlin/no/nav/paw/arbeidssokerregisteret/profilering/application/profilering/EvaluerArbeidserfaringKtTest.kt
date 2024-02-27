@@ -23,6 +23,22 @@ class EvaluerArbeidserfaringKtTest : StringSpec({
 
         result shouldBe setOf(ProfileringsTagger.OPPFYLLER_KRAV_TIL_ARBEIDSERFARING)
     }
+    "veilarbevaluerArbeidsErfaring skal returnere ${ProfileringsTagger.OPPFYLLER_KRAV_TIL_ARBEIDSERFARING} hvis kriteriene er møtt" {
+        val marginForSammenhengendeJobb = 3
+        val minimumsArbeidserfaring = Period.ofMonths(6)
+        val periode = LocalDate.now().minusMonths(12)..<LocalDate.now()
+        val arbeidsforhold = ProfileringTestData.arbeidsforhold()
+
+        val result =
+            evaluerArbeidsErfaring(
+                marginForSammenhengendeJobb,
+                minimumsArbeidserfaring,
+                periode,
+                listOf(arbeidsforhold)
+            )
+
+        result shouldBe setOf(ProfileringsTagger.OPPFYLLER_KRAV_TIL_ARBEIDSERFARING)
+    }
 
     "evaluerArbeidsErfaring skal returnere ${setOf(ProfileringsTagger.OPPFYLLER_KRAV_TIL_ARBEIDSERFARING)} når vi har en " +
             "jobbperiode som er lang nok og innenfor perioden" {
