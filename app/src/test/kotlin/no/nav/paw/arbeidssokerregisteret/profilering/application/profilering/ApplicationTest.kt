@@ -10,6 +10,7 @@ import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
 import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
 import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
 import no.nav.paw.arbeidssokerregisteret.api.v3.OpplysningerOmArbeidssoeker
+import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoSerde
 import no.nav.paw.arbeidssokerregisteret.profilering.application.APPLICATION_CONFIG_FILE
 import no.nav.paw.arbeidssokerregisteret.profilering.application.ApplicationConfiguration
 import no.nav.paw.arbeidssokerregisteret.profilering.application.applicationTopology
@@ -64,6 +65,11 @@ class ApplicationTest : FreeSpec({
             Serdes.Long().deserializer(),
             profileringSerde.deserializer()
         )
+        val profileringsGrunnlagTopic = testDriver.createOutputTopic(
+            applicationConfig.profileringGrunnlagTopic,
+            Serdes.Long().deserializer(),
+            PersonInfoSerde().deserializer()
+        )
         "profileringen skal skrives til output topic når det kommer en periode og opplysninger om arbeidssøker" {
             val key = 1L
             periodeTopic.pipeInput(key, ProfileringTestData.periode)
@@ -71,6 +77,8 @@ class ApplicationTest : FreeSpec({
             val outputProfilering = profileringsTopic.readValue()
             outputProfilering.periodeId shouldBe ProfileringTestData.standardProfilering().periodeId
             outputProfilering.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
+            val outputProfileringGrunnlag = profileringsGrunnlagTopic.readValue()
+            outputProfileringGrunnlag.foedselsdato shouldBe ProfileringTestData.standardBrukerPersonInfo().foedselsdato
             verifyEmptyTopic(profileringsTopic)
         }
         "profileringen skal ikke skrives til output topic når det kun kommer opplysninger" {

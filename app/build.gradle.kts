@@ -15,6 +15,7 @@ val pawUtilsVersion = "24.02.06.10-1"
 val pawPdlClientsVersion = "24.01.12.26-1"
 val pawAaRegClientVersion = "24.01.12.16-1"
 val kafkaStreamsVersion = "3.6.0"
+val jacksonVersion = "2.16.1"
 
 val schema by configurations.creating {
     isTransitive = false
@@ -50,6 +51,10 @@ dependencies {
     implementation("org.apache.avro:avro:1.11.3")
     implementation("org.apache.kafka:kafka-clients:$kafkaStreamsVersion")
     implementation("org.apache.kafka:kafka-streams:$kafkaStreamsVersion")
+
+    // Jackson
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
 
     // Use the Kotlin JUnit 5 integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
