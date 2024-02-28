@@ -27,12 +27,6 @@ spec:
     tracing:
       enabled: true
   env:
-    - name: OTEL_METRICS_EXPORTER
-      value: "none"
-    - name: OTEL_TRACES_EXPORTER
-      value: "maskert_oltp"
-    - name: OTEL_JAVAAGENT_DEBUG
-      value: "false"
     - name: AAREG_URL
       value: https://aareg-services.prod-fss-pub.nais.io/api/v1/arbeidstaker/arbeidsforhold
     - name: AAREG_SCOPE
