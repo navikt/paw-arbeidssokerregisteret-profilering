@@ -11,9 +11,12 @@ import java.time.ZoneId
 private const val MARGIN_FOR_SAMMENHENGENDE_JOBB_DAGER = 3
 private const val MINIMUM_SAMMENHENGENDE_JOBB_MND = 6
 private const val LENGDE_PAA_PERIODE_SOM_SKAL_SJEKKES_AAR = 1L
+
+fun OpplysningerOmArbeidssoeker.sendtInnAvVeilarb() = sendtInnAv.kilde == "veilarbregistrering"
 fun profiler(
     personInfo: PersonInfo,
-    opplysninger: OpplysningerOmArbeidssoeker
+    opplysninger: OpplysningerOmArbeidssoeker,
+    veilarbModus: Boolean = opplysninger.sendtInnAvVeilarb()
 ): Profilering {
     val sendtInnTidspunkt = opplysninger.sendtInnAv.tidspunkt
     val sendtInnDato = sendtInnTidspunkt.atZone(ZoneId.systemDefault()).toLocalDate()
@@ -23,7 +26,7 @@ fun profiler(
                 evaluerAlder(alder) +
                 evaluerHelse(opplysninger.helse) +
                 evaluerUtdanning(opplysninger.utdanning) +
-                if (opplysninger.sendtInnAv.kilde == "veilarbregistrering")
+                if (veilarbModus)
                     veilarbHarJobbetSammenhengendeSeksAvTolvSisteManeder(
                         sendtInnDato,
                         personInfo.arbeidsforhold,
