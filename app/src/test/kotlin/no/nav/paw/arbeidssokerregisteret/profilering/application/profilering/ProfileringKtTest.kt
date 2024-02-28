@@ -81,8 +81,49 @@ class ProfileringKtTest : FreeSpec({
                     arbeidsforhold(fra = "2019-09-15", til = "2020-03-15")
                 )
             ),
-            ProfileringTestData.standardOpplysninger(sendtInnTidspunkt = sendtInnTidspunkt, kilde = "veilarbregistrering")
+            ProfileringTestData.standardOpplysninger(
+                sendtInnTidspunkt = sendtInnTidspunkt,
+                kilde = "veilarbregistrering"
+            )
         ).profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
+    }
+    "En med 'kilde = veilarbregistrering' og jobb 1. i måneden 6 måneder på rad skal gi ${ProfilertTil.ANTATT_GODE_MULIGHETER}" {
+        val sendtInnTidspunkt = LocalDate.of(2021, 12, 31).toInstant()
+        profiler(
+            ProfileringTestData.standardBrukerPersonInfo(
+                arbeidsforhold = listOf(
+                    arbeidsforhold(fra = "2021-11-30", til = "2021-12-02"),
+                    arbeidsforhold(fra = "2021-10-31", til = "2021-11-02"),
+                    arbeidsforhold(fra = "2021-09-30", til = "2021-10-02"),
+                    arbeidsforhold(fra = "2021-08-31", til = "2021-09-02"),
+                    arbeidsforhold(fra = "2021-07-31", til = "2021-08-02"),
+                    arbeidsforhold(fra = "2021-06-30", til = "2021-07-02")
+                )
+            ),
+            ProfileringTestData.standardOpplysninger(
+                sendtInnTidspunkt = sendtInnTidspunkt,
+                kilde = "veilarbregistrering"
+            )
+        ).profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
+    }
+    "En med 'kilde = noe annet' og jobb 1. i måneden 6 måneder på rad skal gi ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING}" {
+        val sendtInnTidspunkt = LocalDate.of(2021, 12, 31).toInstant()
+        profiler(
+            ProfileringTestData.standardBrukerPersonInfo(
+                arbeidsforhold = listOf(
+                    arbeidsforhold(fra = "2021-11-30", til = "2021-12-02"),
+                    arbeidsforhold(fra = "2021-10-31", til = "2021-11-02"),
+                    arbeidsforhold(fra = "2021-09-30", til = "2021-10-02"),
+                    arbeidsforhold(fra = "2021-08-31", til = "2021-09-02"),
+                    arbeidsforhold(fra = "2021-07-31", til = "2021-08-02"),
+                    arbeidsforhold(fra = "2021-06-30", til = "2021-07-02")
+                )
+            ),
+            ProfileringTestData.standardOpplysninger(
+                sendtInnTidspunkt = sendtInnTidspunkt,
+                kilde = "noe annet"
+            )
+        ).profilertTil shouldBe ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
     }
     "En med 'kilde = veilarbregistrering' og under 6 mnd sammenhengende jobb skal gi ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING}" {
         val sendtInnTidspunkt = LocalDate.of(2020, 3, 16).toInstant()
@@ -92,7 +133,10 @@ class ProfileringKtTest : FreeSpec({
                     arbeidsforhold(fra = "2020-01-01", til = "2020-03-15")
                 )
             ),
-            ProfileringTestData.standardOpplysninger(sendtInnTidspunkt = sendtInnTidspunkt, kilde = "veilarbregistrering")
+            ProfileringTestData.standardOpplysninger(
+                sendtInnTidspunkt = sendtInnTidspunkt,
+                kilde = "veilarbregistrering"
+            )
         ).profilertTil shouldBe ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
     }
 })
