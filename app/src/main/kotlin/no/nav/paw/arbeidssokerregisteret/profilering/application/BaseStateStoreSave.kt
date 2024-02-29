@@ -3,7 +3,7 @@ package no.nav.paw.arbeidssokerregisteret.profilering.application
 import io.micrometer.core.instrument.Tag
 import io.micrometer.core.instrument.Tags
 import io.micrometer.prometheus.PrometheusMeterRegistry
-import no.nav.paw.arbeidssokerregisteret.api.helpers.v3.TopicsJoin
+import no.nav.paw.arbeidssokerregisteret.api.helpers.v4.TopicsJoin
 import org.apache.kafka.streams.kstream.KStream
 import org.apache.kafka.streams.kstream.Named
 import org.apache.kafka.streams.processor.PunctuationType

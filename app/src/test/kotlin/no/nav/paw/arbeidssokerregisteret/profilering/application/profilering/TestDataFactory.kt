@@ -2,8 +2,9 @@ package no.nav.paw.arbeidssokerregisteret.profilering.application.profilering
 
 import no.nav.paw.arbeidssokerregisteret.api.v1.*
 import no.nav.paw.arbeidssokerregisteret.api.v1.Metadata
-import no.nav.paw.arbeidssokerregisteret.api.v3.OpplysningerOmArbeidssoeker
-import no.nav.paw.arbeidssokerregisteret.api.v3.Utdanning
+import no.nav.paw.arbeidssokerregisteret.api.v2.Annet
+import no.nav.paw.arbeidssokerregisteret.api.v4.OpplysningerOmArbeidssoeker
+import no.nav.paw.arbeidssokerregisteret.api.v4.Utdanning
 import java.time.Duration
 import no.nav.paw.arbeidssokerregisteret.api.v1.Metadata as ApiMetadata
 import java.time.Instant
@@ -25,7 +26,6 @@ fun opplysninger(
     sendtIn: String = "2020-01-28",
     utdanning: Utdanning = utdanning(),
     helseHindrerArbeid: JaNeiVetIkke = JaNeiVetIkke.NEI,
-    arbeidserfaring: Arbeidserfaring = arbeidserfaring(),
     jobbsituasjon: Jobbsituasjon = jobbsituasjon(),
     annetHindrerArbeid: JaNeiVetIkke = JaNeiVetIkke.NEI
 ) = OpplysningerOmArbeidssoeker(
@@ -34,7 +34,6 @@ fun opplysninger(
     metadata(LocalDate.parse(sendtIn).atStartOfDay().toInstant(ZoneOffset.UTC) + Duration.ofHours(6)),
     utdanning,
     helse(helseHindrerArbeid),
-    arbeidserfaring,
     jobbsituasjon,
     annet(annetHindrerArbeid)
 )
@@ -44,7 +43,6 @@ fun opplysninger(
     sendtInAv: Metadata = metadata(),
     utdanning: Utdanning = utdanning(),
     helse: Helse = helse(),
-    arbeidserfaring: Arbeidserfaring = arbeidserfaring(),
     jobbsituasjon: Jobbsituasjon = jobbsituasjon(),
     annet: Annet = annet()
 ) = OpplysningerOmArbeidssoeker(
@@ -53,7 +51,6 @@ fun opplysninger(
     sendtInAv,
     utdanning,
     helse,
-    arbeidserfaring,
     jobbsituasjon,
     annet
 )
@@ -67,10 +64,6 @@ fun utdanning(
 fun helse(
     helseHinder: JaNeiVetIkke = JaNeiVetIkke.NEI
 ) = Helse(helseHinder)
-
-fun arbeidserfaring(
-    arbeidserfaring: JaNeiVetIkke = JaNeiVetIkke.JA
-) = Arbeidserfaring(arbeidserfaring)
 
 fun jobbsituasjon(
     jobbsituasjon: List<BeskrivelseMedDetaljer> = emptyList()

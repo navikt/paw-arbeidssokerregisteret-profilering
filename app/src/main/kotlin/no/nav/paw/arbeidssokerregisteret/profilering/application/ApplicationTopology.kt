@@ -2,7 +2,7 @@ package no.nav.paw.arbeidssokerregisteret.profilering.application
 
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
-import no.nav.paw.arbeidssokerregisteret.api.v3.OpplysningerOmArbeidssoeker
+import no.nav.paw.arbeidssokerregisteret.api.v4.OpplysningerOmArbeidssoeker
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoTjeneste
 import org.apache.kafka.streams.StreamsBuilder
 import org.apache.kafka.streams.Topology

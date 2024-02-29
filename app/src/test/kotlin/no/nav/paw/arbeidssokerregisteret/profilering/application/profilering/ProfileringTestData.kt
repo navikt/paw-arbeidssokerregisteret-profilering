@@ -4,8 +4,7 @@ import no.nav.paw.aareg.Ansettelsesperiode
 import no.nav.paw.aareg.Arbeidsforhold
 import no.nav.paw.aareg.Arbeidsgiver
 import no.nav.paw.aareg.Opplysningspliktig
-import no.nav.paw.arbeidssokerregisteret.api.v1.Annet
-import no.nav.paw.arbeidssokerregisteret.api.v1.Arbeidserfaring
+import no.nav.paw.arbeidssokerregisteret.api.v2.Annet
 import no.nav.paw.arbeidssokerregisteret.api.v1.BeskrivelseMedDetaljer
 import no.nav.paw.arbeidssokerregisteret.api.v1.Bruker
 import no.nav.paw.arbeidssokerregisteret.api.v1.BrukerType
@@ -16,8 +15,8 @@ import no.nav.paw.arbeidssokerregisteret.api.v1.Metadata
 import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
 import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
 import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
-import no.nav.paw.arbeidssokerregisteret.api.v3.OpplysningerOmArbeidssoeker
-import no.nav.paw.arbeidssokerregisteret.api.v3.Utdanning
+import no.nav.paw.arbeidssokerregisteret.api.v4.OpplysningerOmArbeidssoeker
+import no.nav.paw.arbeidssokerregisteret.api.v4.Utdanning
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfo
 import java.time.Instant
 import java.time.LocalDate
@@ -47,7 +46,6 @@ object ProfileringTestData {
         sendtInnTidspunkt: Instant = today.toInstant(),
         utdanning: Utdanning = utdanning(),
         helse: Helse = helse(),
-        arbeidserfaring: Arbeidserfaring = arbeidserfaring(),
         jobbsituasjon: Jobbsituasjon = jobbsituasjon(),
         annet: Annet = annet(),
         kilde: String = "junit"
@@ -63,7 +61,6 @@ object ProfileringTestData {
             ),
             utdanning,
             helse,
-            arbeidserfaring,
             jobbsituasjon,
             annet
         )
@@ -140,9 +137,6 @@ object ProfileringTestData {
 
     fun helse(helsetilstandHindrerArbeid: JaNeiVetIkke = JaNeiVetIkke.NEI): Helse =
         Helse(helsetilstandHindrerArbeid)
-
-    fun arbeidserfaring(harHattArbeid: JaNeiVetIkke = JaNeiVetIkke.JA): Arbeidserfaring =
-        Arbeidserfaring(harHattArbeid)
 
     fun jobbsituasjon(beskrivelser: List<BeskrivelseMedDetaljer> = emptyList()): Jobbsituasjon =
         Jobbsituasjon(beskrivelser)

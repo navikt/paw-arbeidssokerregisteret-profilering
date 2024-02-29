@@ -1,6 +1,6 @@
 package no.nav.paw.arbeidssokerregisteret.profilering.application
 
-import no.nav.paw.arbeidssokerregisteret.api.helpers.v3.TopicsJoin
+import no.nav.paw.arbeidssokerregisteret.api.helpers.v4.TopicsJoin
 import java.time.Duration
 import java.time.Instant
 import java.util.*

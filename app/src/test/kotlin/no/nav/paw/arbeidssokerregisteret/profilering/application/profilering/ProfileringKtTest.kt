@@ -2,11 +2,11 @@ package no.nav.paw.arbeidssokerregisteret.profilering.application.profilering
 
 import io.kotest.core.spec.style.FreeSpec
 import io.kotest.matchers.shouldBe
-import no.nav.paw.arbeidssokerregisteret.api.v1.Annet
+import no.nav.paw.arbeidssokerregisteret.api.v2.Annet
 import no.nav.paw.arbeidssokerregisteret.api.v1.Helse
 import no.nav.paw.arbeidssokerregisteret.api.v1.JaNeiVetIkke
 import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
-import no.nav.paw.arbeidssokerregisteret.api.v3.Utdanning
+import no.nav.paw.arbeidssokerregisteret.api.v4.Utdanning
 import no.nav.paw.arbeidssokerregisteret.profilering.application.profilering.ProfileringTestData.toInstant
 import java.time.LocalDate
 
