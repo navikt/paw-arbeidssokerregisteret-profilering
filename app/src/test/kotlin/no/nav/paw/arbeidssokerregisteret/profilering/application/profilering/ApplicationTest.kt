@@ -10,7 +10,7 @@ import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
 import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
 import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
 import no.nav.paw.arbeidssokerregisteret.api.v4.OpplysningerOmArbeidssoeker
-import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoSerde
+import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoTopicSerde
 import no.nav.paw.arbeidssokerregisteret.profilering.application.APPLICATION_CONFIG_FILE
 import no.nav.paw.arbeidssokerregisteret.profilering.application.ApplicationConfiguration
 import no.nav.paw.arbeidssokerregisteret.profilering.application.applicationTopology
@@ -33,7 +33,7 @@ class ApplicationTest : FreeSpec({
             .addStateStore(
                 Stores.keyValueStoreBuilder(
                     Stores.inMemoryKeyValueStore(applicationConfig.joiningStateStoreName),
-                    Serdes.String(),
+                    Serdes.Long(),
                     createAvroSerde()
                 )
             )
@@ -68,7 +68,7 @@ class ApplicationTest : FreeSpec({
         val profileringsGrunnlagTopic = testDriver.createOutputTopic(
             applicationConfig.profileringGrunnlagTopic,
             Serdes.Long().deserializer(),
-            PersonInfoSerde().deserializer()
+            PersonInfoTopicSerde().deserializer()
         )
         "profileringen skal skrives til output topic når det kommer en periode og opplysninger om arbeidssøker" {
             val key = 1L
@@ -78,7 +78,7 @@ class ApplicationTest : FreeSpec({
             outputProfilering.periodeId shouldBe ProfileringTestData.standardProfilering().periodeId
             outputProfilering.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
             val outputProfileringGrunnlag = profileringsGrunnlagTopic.readValue()
-            outputProfileringGrunnlag.foedselsdato shouldBe ProfileringTestData.standardBrukerPersonInfo().foedselsdato
+            outputProfileringGrunnlag.personInfo.foedselsdato shouldBe ProfileringTestData.standardBrukerPersonInfo().foedselsdato
             verifyEmptyTopic(profileringsTopic)
         }
         "profileringen skal ikke skrives til output topic når det kun kommer opplysninger" {
@@ -158,10 +158,10 @@ class ApplicationTest : FreeSpec({
             testRecord1.key shouldBe key
             Instant.ofEpochMilli(testRecord1.timestamp()) shouldBe startPeriode.startet.tidspunkt
             verifyEmptyTopic(profileringsTopic)
-            val keyValueStore: KeyValueStore<String, TopicsJoin> = testDriver.getKeyValueStore(
+            val keyValueStore: KeyValueStore<Long, TopicsJoin> = testDriver.getKeyValueStore(
                 applicationConfig.joiningStateStoreName
             )
-            val topicsJoin = keyValueStore["${key}:${opplysninger.periodeId}"]
+            val topicsJoin = keyValueStore[key]
             topicsJoin.shouldNotBeNull()
             topicsJoin.opplysningerOmArbeidssoeker shouldBe null
             topicsJoin.periode shouldBe avsluttPeriode
