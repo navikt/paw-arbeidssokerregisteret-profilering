@@ -8,7 +8,7 @@ import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.Serde
 import org.apache.kafka.common.serialization.Serializer
 
-class PersonInfoSerde: Serde<PersonInfo> {
+class PersonInfoTopicSerde: Serde<PersonInfoTopic> {
     private val objectMapper = ObjectMapper()
         .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
         .registerModules(
@@ -23,20 +23,20 @@ class PersonInfoSerde: Serde<PersonInfo> {
             com.fasterxml.jackson.datatype.jsr310.JavaTimeModule()
         )
 
-    override fun serializer(): Serializer<PersonInfo> = PersonInfoSerializer(objectMapper)
+    override fun serializer(): Serializer<PersonInfoTopic> = PersonInfoSerializer(objectMapper)
 
-    override fun deserializer(): Deserializer<PersonInfo> = PersonInfoDeserializer(objectMapper)
+    override fun deserializer(): Deserializer<PersonInfoTopic> = PersonInfoDeserializer(objectMapper)
 }
 
-class PersonInfoSerializer(private val objectMapper: ObjectMapper): Serializer<PersonInfo> {
-    override fun serialize(topic: String?, data: PersonInfo?): ByteArray {
+class PersonInfoSerializer(private val objectMapper: ObjectMapper): Serializer<PersonInfoTopic> {
+    override fun serialize(topic: String?, data: PersonInfoTopic?): ByteArray {
         return objectMapper.writeValueAsBytes(data)
     }
 }
 
-class PersonInfoDeserializer(private val objectMapper: ObjectMapper): Deserializer<PersonInfo> {
-    override fun deserialize(topic: String?, data: ByteArray?): PersonInfo? {
+class PersonInfoDeserializer(private val objectMapper: ObjectMapper): Deserializer<PersonInfoTopic> {
+    override fun deserialize(topic: String?, data: ByteArray?): PersonInfoTopic? {
         if (data == null) return null
-        return objectMapper.readValue(data, PersonInfo::class.java)
+        return objectMapper.readValue(data, PersonInfoTopic::class.java)
     }
 }

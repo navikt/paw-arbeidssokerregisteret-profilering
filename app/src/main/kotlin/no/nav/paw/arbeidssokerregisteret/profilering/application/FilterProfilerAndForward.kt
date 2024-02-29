@@ -5,11 +5,11 @@ import io.micrometer.core.instrument.Tags
 import io.micrometer.prometheus.PrometheusMeterRegistry
 import no.nav.paw.arbeidssokerregisteret.api.helpers.v4.TopicsJoin
 import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
-import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoSerde
 import no.nav.paw.arbeidssokerregisteret.profilering.application.profilering.profiler
 import no.nav.paw.arbeidssokerregisteret.profilering.application.profilering.sendtInnAvVeilarb
-import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfo
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoTjeneste
+import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoTopic
+import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoTopicSerde
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.kstream.KStream
 import org.apache.kafka.streams.kstream.Produced
@@ -55,19 +55,20 @@ fun KStream<Long, TopicsJoin>.filterProfileAndForward(
                 )
             ).increment()
         }
-        .mapValues { _, (personInfo, sendInAvVeilarb, stdProfilering, veilarbProfilering) ->
-            personInfo to (if (sendInAvVeilarb) veilarbProfilering else stdProfilering)
+        .mapValues { _, (personInfo, sendtInnAvVeilarb, stdProfilering, veilarbProfilering) ->
+            personInfo to (if (sendtInnAvVeilarb) veilarbProfilering else stdProfilering)
         }
-        .flatMapValues { _, value -> listOf(value.first, value.second) }
 
     branches
+        .mapValues {_, value -> value.second}
         .filter { _, value -> value is Profilering }
         .to(applicationConfiguration.profileringTopic)
 
     branches
-        .filter { _, value -> value is PersonInfo }
-        .mapValues { _, personInfo -> personInfo as PersonInfo }
-        .to(applicationConfiguration.profileringGrunnlagTopic, Produced.with(Serdes.Long(), PersonInfoSerde()))
+        .mapValues { _, (personInfo, profilering) ->
+            PersonInfoTopic(profileringId = profilering.id, personInfo = personInfo)
+        }
+        .to(applicationConfiguration.profileringGrunnlagTopic, Produced.with(Serdes.Long(), PersonInfoTopicSerde()))
 }
 
 data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
