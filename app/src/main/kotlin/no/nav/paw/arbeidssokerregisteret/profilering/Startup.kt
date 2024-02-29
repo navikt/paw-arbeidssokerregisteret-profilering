@@ -15,7 +15,6 @@ import no.nav.paw.config.hoplite.loadNaisOrLocalConfiguration
 import no.nav.paw.config.kafka.KAFKA_CONFIG_WITH_SCHEME_REG
 import no.nav.paw.config.kafka.KafkaConfig
 import no.nav.paw.config.kafka.streams.KafkaStreamsFactory
-import okhttp3.internal.wait
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.common.serialization.Serdes.LongSerde
 import org.apache.kafka.streams.KafkaStreams
@@ -38,7 +37,7 @@ fun main() {
         .addStateStore(
             Stores.keyValueStoreBuilder(
                 Stores.persistentKeyValueStore(applicationConfig.joiningStateStoreName),
-                Serdes.String(),
+                Serdes.Long(),
                 streamsConfig.createSpecificAvroSerde()
             )
         )
