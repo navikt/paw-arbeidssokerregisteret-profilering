@@ -53,7 +53,7 @@ fun main() {
     val kafkaStreams = KafkaStreams(topology, streamsConfig.properties)
 
     kafkaStreams.setUncaughtExceptionHandler { throwable ->
-        logger.error("Uventet feil", throwable)
+        logger.error("Uventet feil: $throwable", throwable)
         StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.SHUTDOWN_APPLICATION
     }
 
