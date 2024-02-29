@@ -64,18 +64,25 @@ sealed class BaseStateStoreSave(
         stateStore: KeyValueStore<String, TopicsJoin>,
         interval: Duration = Duration.ofMinutes(10)
     ) = ctx.schedule(interval, PunctuationType.STREAM_TIME) { time ->
-        val currentTime = Instant.ofEpochMilli(time)
-        var valuesIntStore: Long = 0L
-        stateStore.all().forEachRemaining { keyValue ->
-            valuesIntStore += 1
-            val compositeKey = keyValue.key
-            val value = keyValue.value
-            if (value.isOutdated(currentTime)) {
-                logger.debug("Sletter utdatert record med key: $compositeKey")
-                stateStore.delete(compositeKey)
+        try {
+            val currentTime = Instant.ofEpochMilli(time)
+            var valuesIntStore: Long = 0L
+            stateStore.all().forEachRemaining { keyValue ->
+                valuesIntStore += 1
+                val compositeKey = keyValue.key
+                val value = keyValue.value
+                if (value.isOutdated(currentTime)) {
+                    logger.debug("Sletter utdatert record med key: $compositeKey")
+                    stateStore.delete(compositeKey)
+                }
             }
+            metricsMap[ctx.taskId().partition()]?.set(valuesIntStore)
+        } catch (e: Exception) {
+            //Exception her ga bare "Exception caught while punctuating processor 'PeriodeStateStoreSave'"
+            // i exception handler (in trace eller ekstra info om hva som gikk galt)
+            logger.error("Feil ved opprydding av state store: $e", e)
+            throw e
         }
-        metricsMap[ctx.taskId().partition()]?.set(valuesIntStore)
     }
 
     override fun process(record: Record<Long, TopicsJoin>?) {
