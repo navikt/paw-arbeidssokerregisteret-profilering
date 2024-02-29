@@ -14,7 +14,6 @@ import org.apache.kafka.streams.state.KeyValueStore
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.Instant
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.reflect.KClass
@@ -36,7 +35,7 @@ sealed class BaseStateStoreSave(
     private val stateStoreName: String,
     private val prometheusMeterRegistry: PrometheusMeterRegistry
 ) : Processor<Long, TopicsJoin, Long, TopicsJoin> {
-    private var stateStore: KeyValueStore<String, TopicsJoin>? = null
+    private var stateStore: KeyValueStore<Long, TopicsJoin>? = null
     private var context: ProcessorContext<Long, TopicsJoin>? = null
     private val logger = LoggerFactory.getLogger("applicationTopology")
 
@@ -61,22 +60,21 @@ sealed class BaseStateStoreSave(
 
     private fun scheduleCleanup(
         ctx: ProcessorContext<Long, TopicsJoin>,
-        stateStore: KeyValueStore<String, TopicsJoin>,
+        stateStore: KeyValueStore<Long, TopicsJoin>,
         interval: Duration = Duration.ofMinutes(10)
     ) = ctx.schedule(interval, PunctuationType.STREAM_TIME) { time ->
         try {
             val currentTime = Instant.ofEpochMilli(time)
-            var valuesIntStore: Long = 0L
+            var valuesInStore = 0L
             stateStore.all().forEachRemaining { keyValue ->
-                valuesIntStore += 1
-                val compositeKey = keyValue.key
+                valuesInStore += 1
                 val value = keyValue.value
                 if (value.isOutdated(currentTime)) {
-                    logger.debug("Sletter utdatert record med key: $compositeKey")
-                    stateStore.delete(compositeKey)
+                    logger.debug("Sletter utdatert record med key: ${keyValue.key}")
+                    stateStore.delete(keyValue.key)
                 }
             }
-            metricsMap[ctx.taskId().partition()]?.set(valuesIntStore)
+            metricsMap[ctx.taskId().partition()]?.set(valuesInStore)
         } catch (e: Exception) {
             //Exception her ga bare "Exception caught while punctuating processor 'PeriodeStateStoreSave'"
             // i exception handler (in trace eller ekstra info om hva som gikk galt)
@@ -89,20 +87,17 @@ sealed class BaseStateStoreSave(
         if (record == null) return
         val store = requireNotNull(stateStore) { "State store is not initialized" }
         val ctx = requireNotNull(context) { "Context is not initialized" }
-        val compositeKey = compositeKey(record.key(), record.value().periodeId())
-        val currentValue = store.get(compositeKey)
+        val currentValue = store.get(record.key())
         val newValue = record.value() mergeTo currentValue
         if (newValue.isComplete()) {
             ctx.forward(record.withValue(newValue))
             // Vi kan få flere opplysninger på samme periode, så vi beholder den.
-            store.put(compositeKey, TopicsJoin(newValue.periode, null, null))
+            store.put(record.key(), TopicsJoin(newValue.periode, null, null))
         } else {
-            store.put(compositeKey, newValue)
+            store.put(record.key(), newValue)
         }
     }
 }
-
-fun compositeKey(orginalKey: Long, periodeId: UUID) = "$orginalKey:$periodeId"
 
 class OpplysningerOmArbeidssoekerStateStoreSave(
     stateStoreName: String,
