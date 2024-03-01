@@ -35,7 +35,7 @@ sealed class BaseStateStoreSave(
     private val stateStoreName: String,
     private val prometheusMeterRegistry: PrometheusMeterRegistry
 ) : Processor<Long, TopicsJoin, Long, TopicsJoin> {
-    private var stateStore: KeyValueStore<Long, TopicsJoin>? = null
+    private var stateStore: KeyValueStore<String, TopicsJoin>? = null
     private var context: ProcessorContext<Long, TopicsJoin>? = null
     private val logger = LoggerFactory.getLogger("applicationTopology")
 
@@ -60,7 +60,7 @@ sealed class BaseStateStoreSave(
 
     private fun scheduleCleanup(
         ctx: ProcessorContext<Long, TopicsJoin>,
-        stateStore: KeyValueStore<Long, TopicsJoin>,
+        stateStore: KeyValueStore<String, TopicsJoin>,
         interval: Duration = Duration.ofMinutes(10)
     ) = ctx.schedule(interval, PunctuationType.STREAM_TIME) { time ->
         try {
@@ -87,14 +87,15 @@ sealed class BaseStateStoreSave(
         if (record == null) return
         val store = requireNotNull(stateStore) { "State store is not initialized" }
         val ctx = requireNotNull(context) { "Context is not initialized" }
-        val currentValue = store.get(record.key())
+        val storeKey = record.value().periodeId().toString()
+        val currentValue = store.get(storeKey)
         val newValue = record.value() mergeTo currentValue
         if (newValue.isComplete()) {
             ctx.forward(record.withValue(newValue))
             // Vi kan få flere opplysninger på samme periode, så vi beholder den.
-            store.put(record.key(), TopicsJoin(newValue.periode, null, null))
+            store.put(storeKey, TopicsJoin(newValue.periode, null, null))
         } else {
-            store.put(record.key(), newValue)
+            store.put(storeKey, newValue)
         }
     }
 }

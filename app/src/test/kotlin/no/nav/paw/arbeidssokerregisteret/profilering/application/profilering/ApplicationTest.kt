@@ -24,6 +24,7 @@ import org.apache.kafka.streams.state.KeyValueStore
 import org.apache.kafka.streams.state.Stores
 import java.time.Duration
 import java.time.Instant
+import java.util.*
 import kotlin.test.fail
 
 class ApplicationTest : FreeSpec({
@@ -33,7 +34,7 @@ class ApplicationTest : FreeSpec({
             .addStateStore(
                 Stores.keyValueStoreBuilder(
                     Stores.inMemoryKeyValueStore(applicationConfig.joiningStateStoreName),
-                    Serdes.Long(),
+                    Serdes.String(),
                     createAvroSerde()
                 )
             )
@@ -83,7 +84,7 @@ class ApplicationTest : FreeSpec({
         }
         "profileringen skal ikke skrives til output topic når det kun kommer opplysninger" {
             val key = 2L
-            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger())
+            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger(UUID.randomUUID()))
             verifyEmptyTopic(profileringsTopic)
         }
         "profileringen skal ikke skrives til output topic når det kun kommer periode" {
@@ -112,12 +113,13 @@ class ApplicationTest : FreeSpec({
         "profileringen skal skrives til output topic når det kommer opplysninger før periode" {
             verifyEmptyTopic(profileringsTopic)
             val key = 5L
-            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger())
+            val periodeId = UUID.randomUUID()
+            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger(periodeId))
             verifyEmptyTopic(profileringsTopic)
-            periodeTopic.pipeInput(key, ProfileringTestData.periode)
+            periodeTopic.pipeInput(key, ProfileringTestData.standardPeriode(periodeId))
             val (recordKey, outputProfilering) = profileringsTopic.readKeyValue()
             recordKey shouldBe key
-            outputProfilering.periodeId shouldBe ProfileringTestData.standardProfilering().periodeId
+            outputProfilering.periodeId shouldBe periodeId
             outputProfilering.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
             verifyEmptyTopic(profileringsTopic)
         }
@@ -158,10 +160,10 @@ class ApplicationTest : FreeSpec({
             testRecord1.key shouldBe key
             Instant.ofEpochMilli(testRecord1.timestamp()) shouldBe startPeriode.startet.tidspunkt
             verifyEmptyTopic(profileringsTopic)
-            val keyValueStore: KeyValueStore<Long, TopicsJoin> = testDriver.getKeyValueStore(
+            val keyValueStore: KeyValueStore<String, TopicsJoin> = testDriver.getKeyValueStore(
                 applicationConfig.joiningStateStoreName
             )
-            val topicsJoin = keyValueStore[key]
+            val topicsJoin = keyValueStore[avsluttPeriode.id.toString()]
             topicsJoin.shouldNotBeNull()
             topicsJoin.opplysningerOmArbeidssoeker shouldBe null
             topicsJoin.periode shouldBe avsluttPeriode

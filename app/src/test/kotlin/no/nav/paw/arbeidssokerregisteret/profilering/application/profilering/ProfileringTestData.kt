@@ -31,6 +31,15 @@ object ProfileringTestData {
     const val identitetsnummer = "12345678911"
     private val uuid = UUID.randomUUID()
 
+    fun standardPeriode(
+        periodeId: UUID = uuid
+    ) = Periode(
+        periodeId,
+        identitetsnummer,
+        metadata,
+        null
+    )
+
     fun standardBrukerPersonInfo(
         foedselsdato: LocalDate = LocalDate.of(1986, Month.MAY, 1),
         foedselsAar: Int = 1986,
@@ -43,6 +52,7 @@ object ProfileringTestData {
         )
 
     fun standardOpplysninger(
+        periodeId: UUID = uuid,
         sendtInnTidspunkt: Instant = today.toInstant(),
         utdanning: Utdanning = utdanning(),
         helse: Helse = helse(),
@@ -52,7 +62,7 @@ object ProfileringTestData {
     ): OpplysningerOmArbeidssoeker =
         OpplysningerOmArbeidssoeker(
             UUID.randomUUID(),
-            uuid,
+            periodeId,
             Metadata(
                 sendtInnTidspunkt,
                 bruker,
