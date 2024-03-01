@@ -87,6 +87,7 @@ sealed class BaseStateStoreSave(
         if (record == null) return
         val store = requireNotNull(stateStore) { "State store is not initialized" }
         val ctx = requireNotNull(context) { "Context is not initialized" }
+        // TODO: Bruk UUID istedet for String ved neste versjon av topics (v12)
         val storeKey = record.value().periodeId().toString()
         val currentValue = store.get(storeKey)
         val newValue = record.value() mergeTo currentValue
