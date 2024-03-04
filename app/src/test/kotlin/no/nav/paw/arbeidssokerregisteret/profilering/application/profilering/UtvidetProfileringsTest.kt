@@ -29,9 +29,9 @@ class UtvidetProfileringsTest : FreeSpec({
                     helseHindrerArbeid = JaNeiVetIkke.NEI,
                     annetHindrerArbeid = JaNeiVetIkke.NEI
                 ),
-                alder = 30,
-                harJobbetSammenhengendeSiste12Mnd = true,
-                profilertTil = ProfilertTil.ANTATT_GODE_MULIGHETER
+                forventetAlder = 30,
+                forventetHarJobbetSammenhengendeSiste12Mnd = true,
+                forventetProfilertTil = ProfilertTil.ANTATT_GODE_MULIGHETER
             ),
             test(
                 "Er 30 år og har ikke jobbet sammenhengende i 6 av de siste 12 månedene",
@@ -50,9 +50,9 @@ class UtvidetProfileringsTest : FreeSpec({
                     helseHindrerArbeid = JaNeiVetIkke.NEI,
                     annetHindrerArbeid = JaNeiVetIkke.NEI
                 ),
-                alder = 30,
-                harJobbetSammenhengendeSiste12Mnd = false,
-                profilertTil = ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
+                forventetAlder = 30,
+                forventetHarJobbetSammenhengendeSiste12Mnd = false,
+                forventetProfilertTil = ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
             ),
             test("Er 62 år og har jobbet sammenhende i 6 av de 12 siste månedene",
                 personInfo(
@@ -70,19 +70,19 @@ class UtvidetProfileringsTest : FreeSpec({
                     helseHindrerArbeid = JaNeiVetIkke.NEI,
                     annetHindrerArbeid = JaNeiVetIkke.NEI
                 ),
-                alder = 62,
-                harJobbetSammenhengendeSiste12Mnd = true,
-                profilertTil = ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
+                forventetAlder = 62,
+                forventetHarJobbetSammenhengendeSiste12Mnd = true,
+                forventetProfilertTil = ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
             )
-        ).map { (beskrivelse, personInfo, opplysninger, alder, harJobbetSammenhengendeSiste12Mnd, profilertTil) ->
+        ).map { (beskrivelse, personInfo, opplysninger, forventetAlder, forventetHarJobbetSammenhengendeSiste12Mnd, forventetProfilertTil) ->
             beskrivelse {
                 val profilering = profiler(
                     personInfo = personInfo,
                     opplysninger = opplysninger
                 )
-                profilering.profilertTil shouldBe profilertTil
-                profilering.alder shouldBe alder
-                profilering.jobbetSammenhengendeSeksAvTolvSisteMnd shouldBe harJobbetSammenhengendeSiste12Mnd
+                profilering.profilertTil shouldBe forventetProfilertTil
+                profilering.alder shouldBe forventetAlder
+                profilering.jobbetSammenhengendeSeksAvTolvSisteMnd shouldBe forventetHarJobbetSammenhengendeSiste12Mnd
             }
         }
     }
@@ -92,8 +92,8 @@ fun test(
     beskrivelse: String,
     personInfo: PersonInfo,
     opplysninger: OpplysningerOmArbeidssoeker,
-    alder: Int,
-    harJobbetSammenhengendeSiste12Mnd: Boolean,
-    profilertTil: ProfilertTil
+    forventetAlder: Int,
+    forventetHarJobbetSammenhengendeSiste12Mnd: Boolean,
+    forventetProfilertTil: ProfilertTil
 ): Row6<String, PersonInfo, OpplysningerOmArbeidssoeker, Int, Boolean, ProfilertTil> =
-    row(beskrivelse, personInfo, opplysninger, alder, harJobbetSammenhengendeSiste12Mnd, profilertTil)
+    row(beskrivelse, personInfo, opplysninger, forventetAlder, forventetHarJobbetSammenhengendeSiste12Mnd, forventetProfilertTil)
