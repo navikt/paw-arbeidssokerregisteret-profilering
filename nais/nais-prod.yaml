@@ -24,8 +24,9 @@ spec:
     pool: nav-prod
     streams: true
   observability:
-    tracing:
+    autoInstrumentation:
       enabled: true
+      runtime: java
   env:
     - name: AAREG_URL
       value: https://aareg-services.prod-fss-pub.nais.io/api/v1/arbeidstaker/arbeidsforhold
