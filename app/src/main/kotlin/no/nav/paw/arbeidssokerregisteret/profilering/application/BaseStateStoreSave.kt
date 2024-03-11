@@ -14,6 +14,7 @@ import org.apache.kafka.streams.state.KeyValueStore
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.Instant
+import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.reflect.KClass
@@ -35,7 +36,7 @@ sealed class BaseStateStoreSave(
     private val stateStoreName: String,
     private val prometheusMeterRegistry: PrometheusMeterRegistry
 ) : Processor<Long, TopicsJoin, Long, TopicsJoin> {
-    private var stateStore: KeyValueStore<String, TopicsJoin>? = null
+    private var stateStore: KeyValueStore<UUID, TopicsJoin>? = null
     private var context: ProcessorContext<Long, TopicsJoin>? = null
     private val logger = LoggerFactory.getLogger("applicationTopology")
 
@@ -60,7 +61,7 @@ sealed class BaseStateStoreSave(
 
     private fun scheduleCleanup(
         ctx: ProcessorContext<Long, TopicsJoin>,
-        stateStore: KeyValueStore<String, TopicsJoin>,
+        stateStore: KeyValueStore<UUID, TopicsJoin>,
         interval: Duration = Duration.ofMinutes(10)
     ) = ctx.schedule(interval, PunctuationType.STREAM_TIME) { time ->
         try {
@@ -70,7 +71,7 @@ sealed class BaseStateStoreSave(
                 valuesInStore += 1
                 val value = keyValue.value
                 if (value.isOutdated(currentTime)) {
-                    logger.debug("Sletter utdatert record med key: ${keyValue.key}")
+                    logger.debug("Sletter utdatert record med key: {}", keyValue.key)
                     stateStore.delete(keyValue.key)
                 }
             }
@@ -87,8 +88,7 @@ sealed class BaseStateStoreSave(
         if (record == null) return
         val store = requireNotNull(stateStore) { "State store is not initialized" }
         val ctx = requireNotNull(context) { "Context is not initialized" }
-        // TODO: Bruk UUID istedet for String ved neste versjon av topics (v12)
-        val storeKey = record.value().periodeId().toString()
+        val storeKey = record.value().periodeId()
         val currentValue = store.get(storeKey)
         val newValue = record.value() mergeTo currentValue
         if (newValue.isComplete()) {

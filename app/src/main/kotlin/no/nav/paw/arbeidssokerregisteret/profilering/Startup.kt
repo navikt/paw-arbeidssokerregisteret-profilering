@@ -37,7 +37,7 @@ fun main() {
         .addStateStore(
             Stores.keyValueStoreBuilder(
                 Stores.persistentKeyValueStore(applicationConfig.joiningStateStoreName),
-                Serdes.String(),
+                Serdes.UUID(),
                 streamsConfig.createSpecificAvroSerde()
             )
         )

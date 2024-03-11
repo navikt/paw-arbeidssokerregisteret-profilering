@@ -34,7 +34,7 @@ class ApplicationTest : FreeSpec({
             .addStateStore(
                 Stores.keyValueStoreBuilder(
                     Stores.inMemoryKeyValueStore(applicationConfig.joiningStateStoreName),
-                    Serdes.String(),
+                    Serdes.UUID(),
                     createAvroSerde()
                 )
             )
@@ -160,10 +160,10 @@ class ApplicationTest : FreeSpec({
             testRecord1.key shouldBe key
             Instant.ofEpochMilli(testRecord1.timestamp()) shouldBe startPeriode.startet.tidspunkt
             verifyEmptyTopic(profileringsTopic)
-            val keyValueStore: KeyValueStore<String, TopicsJoin> = testDriver.getKeyValueStore(
+            val keyValueStore: KeyValueStore<UUID, TopicsJoin> = testDriver.getKeyValueStore(
                 applicationConfig.joiningStateStoreName
             )
-            val topicsJoin = keyValueStore[avsluttPeriode.id.toString()]
+            val topicsJoin = keyValueStore[avsluttPeriode.id]
             topicsJoin.shouldNotBeNull()
             topicsJoin.opplysningerOmArbeidssoeker shouldBe null
             topicsJoin.periode shouldBe avsluttPeriode
