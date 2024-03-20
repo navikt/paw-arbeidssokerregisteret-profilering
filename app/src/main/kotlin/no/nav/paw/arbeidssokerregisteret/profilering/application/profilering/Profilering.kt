@@ -22,7 +22,7 @@ fun profiler(
     val sendtInnDato = sendtInnTidspunkt.atZone(ZoneId.systemDefault()).toLocalDate()
     val alder = alderVedTidspunkt(sendtInnTidspunkt, personInfo)
     val evalueringer =
-        evaluerAnnet(opplysninger.annet) +
+                evaluerAnnet(opplysninger.annet) +
                 evaluerAlder(alder) +
                 evaluerHelse(opplysninger.helse) +
                 evaluerUtdanning(opplysninger.utdanning) +
@@ -54,6 +54,10 @@ fun profiler(
     }
 }
 
+fun Set<ProfileringsTagger>.anbefalerArbeidsevnevudering(): Boolean =
+    contains(HELSETILSTAND_HINDRER_ARBEID) ||
+            contains(ANDRE_FORHOLD_HINDRER_ARBEID)
+
 fun Set<ProfileringsTagger>.anbefalerStandardInnsats(): Boolean =
     contains(ALDER_INDIKERER_STANDARD_INNSATS) &&
             contains(OPPFYLLER_KRAV_TIL_ARBEIDSERFARING) &&
@@ -62,7 +66,5 @@ fun Set<ProfileringsTagger>.anbefalerStandardInnsats(): Boolean =
             !contains(ANDRE_FORHOLD_HINDRER_ARBEID)
 
 
-fun Set<ProfileringsTagger>.anbefalerArbeidsevnevudering(): Boolean =
-    contains(HELSETILSTAND_HINDRER_ARBEID) ||
-            contains(ANDRE_FORHOLD_HINDRER_ARBEID)
+
 
