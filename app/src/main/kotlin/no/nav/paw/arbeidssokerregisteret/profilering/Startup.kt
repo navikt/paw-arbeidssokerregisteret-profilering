@@ -32,6 +32,7 @@ fun main() {
     val streamsConfig = KafkaStreamsFactory(applicationConfig.applicationIdSuffix, kafkaConfig)
         .withDefaultKeySerde(LongSerde::class)
         .withDefaultValueSerde(SpecificAvroSerde::class)
+        .withExactlyOnce()
 
     val streamsBuilder = StreamsBuilder()
         .addStateStore(
