@@ -82,6 +82,25 @@ class ApplicationTest : FreeSpec({
             outputProfileringGrunnlag.personInfo.foedselsdato shouldBe ProfileringTestData.standardBrukerPersonInfo().foedselsdato
             verifyEmptyTopic(profileringsTopic)
         }
+        "profileringen skal ikke skrives til output topic når det kommer en periode med en opplysninger fra før 2024" {
+            val key = 1L
+            val periodeId = UUID.randomUUID()
+            periodeTopic.pipeInput(key, ProfileringTestData.standardPeriode(periodeId = periodeId,  startet = Instant.parse("2023-10-31T23:59:59.999Z")))
+            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger(periodeId = periodeId, sendtInnTidspunkt = Instant.parse("2023-11-30T23:59:59.999Z")))
+            profileringsTopic.isEmpty shouldBe true
+        }
+
+        "profileringen skal skrives til output topic når det kommer en periode med en opplysninger fra etter 2024" {
+            val key = 1L
+            val periodeId = UUID.randomUUID()
+            periodeTopic.pipeInput(key, ProfileringTestData.standardPeriode(periodeId = periodeId,  startet = Instant.parse("2023-10-31T23:59:59.999Z")))
+            opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger(periodeId = periodeId, sendtInnTidspunkt = Instant.parse("2024-01-31T23:59:59.999Z")))
+            profileringsTopic.isEmpty shouldBe false
+            val outputProfilering = profileringsTopic.readValue()
+            outputProfilering.periodeId shouldBe periodeId
+        }
+
+
         "profileringen skal ikke skrives til output topic når det kun kommer opplysninger" {
             val key = 2L
             opplysningerOmArbeidssoekerTopic.pipeInput(key, ProfileringTestData.standardOpplysninger(UUID.randomUUID()))

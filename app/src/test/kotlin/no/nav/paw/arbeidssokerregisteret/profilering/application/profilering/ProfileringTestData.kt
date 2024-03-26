@@ -32,11 +32,12 @@ object ProfileringTestData {
     private val uuid = UUID.randomUUID()
 
     fun standardPeriode(
-        periodeId: UUID = uuid
+        periodeId: UUID = uuid,
+        startet: Instant? = null
     ) = Periode(
         periodeId,
         identitetsnummer,
-        metadata,
+        startet?.let(::metadata) ?: metadata,
         null
     )
 
@@ -124,6 +125,12 @@ object ProfileringTestData {
 
     val bruker = Bruker(BrukerType.SYSTEM, identitetsnummer)
 
+    fun metadata(tidspunkt: Instant) = Metadata(
+        tidspunkt,
+        bruker,
+        "test",
+        "test"
+    )
     val metadata = Metadata(
         today.minusYears(1).toInstant(),
         bruker,
