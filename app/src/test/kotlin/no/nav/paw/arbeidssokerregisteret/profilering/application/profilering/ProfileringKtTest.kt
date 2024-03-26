@@ -49,17 +49,25 @@ class ProfileringKtTest : FreeSpec({
             ProfileringTestData.standardOpplysninger(annet = Annet(JaNeiVetIkke.JA))
         ).profilertTil shouldBe ProfilertTil.OPPGITT_HINDRINGER
     }
-    "En med 'utdanning bestaatt = nei' skal gi ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING}" {
+    "En med 'utdanning bestaatt = nei' skal gi ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING} dersom nuskode > 2" {
         profiler(
             ProfileringTestData.standardBrukerPersonInfo(),
-            ProfileringTestData.standardOpplysninger(utdanning = Utdanning("1", JaNeiVetIkke.NEI, JaNeiVetIkke.JA))
+            ProfileringTestData.standardOpplysninger(utdanning = Utdanning("3", JaNeiVetIkke.NEI, JaNeiVetIkke.JA))
         ).profilertTil shouldBe ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
+        profiler(
+            ProfileringTestData.standardBrukerPersonInfo(),
+            ProfileringTestData.standardOpplysninger(utdanning = Utdanning("2", JaNeiVetIkke.NEI, JaNeiVetIkke.JA))
+        ).profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
     }
-    "En med 'utdanning godkjent = nei' skal gi ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING}" {
+    "En med 'utdanning godkjent = nei' skal gi ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING} dersom nuskode > 2" {
         profiler(
             ProfileringTestData.standardBrukerPersonInfo(),
-            ProfileringTestData.standardOpplysninger(utdanning = Utdanning("1", JaNeiVetIkke.JA, JaNeiVetIkke.NEI))
+            ProfileringTestData.standardOpplysninger(utdanning = Utdanning("3", JaNeiVetIkke.JA, JaNeiVetIkke.NEI))
         ).profilertTil shouldBe ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
+        profiler(
+            ProfileringTestData.standardBrukerPersonInfo(),
+            ProfileringTestData.standardOpplysninger(utdanning = Utdanning("2", JaNeiVetIkke.JA, JaNeiVetIkke.NEI))
+        ).profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
     }
     "En med 'nus = 0' skal gi ${ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING}" {
         profiler(
