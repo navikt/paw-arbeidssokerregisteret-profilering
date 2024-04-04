@@ -36,7 +36,6 @@ class SetupStreams(
                 personInfoTjeneste,
                 applicationConfiguration,
                 prometheusRegistry
-
             )
     }
 }
