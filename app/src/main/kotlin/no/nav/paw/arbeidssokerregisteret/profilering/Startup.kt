@@ -25,9 +25,11 @@ import org.apache.kafka.streams.state.Stores
 import org.slf4j.LoggerFactory
 
 fun main() {
+    val avroSchemaInfo = getModuleInfo("avro-schema")
     val logger = LoggerFactory.getLogger("app")
-    logger.info("Starter: {}", ApplicationInfo.id)
+    logger.info("Starter: {} => {}", ApplicationInfo.id, avroSchemaInfo)
     val prometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+    prometheusMeterRegistry.registerMainAvroSchemaGauges()
     val kafkaConfig = loadNaisOrLocalConfiguration<KafkaConfig>(KAFKA_STREAMS_CONFIG_WITH_SCHEME_REG)
     val applicationConfig = loadNaisOrLocalConfiguration<ApplicationConfiguration>(APPLICATION_CONFIG_FILE)
     val streamsConfig = KafkaStreamsFactory(applicationConfig.applicationIdSuffix, kafkaConfig)

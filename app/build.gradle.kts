@@ -23,6 +23,7 @@ val schema by configurations.creating {
 
 dependencies {
     schema("no.nav.paw.arbeidssokerregisteret.api:main-avro-schema:$arbeidssokerregisteretVersion")
+    implementation("no.nav.paw.arbeidssokerregisteret.api:main-avro-schema:$arbeidssokerregisteretVersion")
     implementation("no.nav.paw:aareg-client:$pawAaRegClientVersion")
     implementation("no.nav.paw:pdl-client:$pawPdlClientsVersion")
 
