@@ -4,6 +4,9 @@ import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde
 import io.micrometer.core.instrument.binder.kafka.KafkaStreamsMetrics
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
+import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
+import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
+import no.nav.paw.arbeidssokerregisteret.api.v4.OpplysningerOmArbeidssoeker
 import no.nav.paw.arbeidssokerregisteret.profilering.application.APPLICATION_CONFIG_FILE
 import no.nav.paw.arbeidssokerregisteret.profilering.application.ApplicationConfiguration
 import no.nav.paw.arbeidssokerregisteret.profilering.application.applicationTopology
@@ -28,10 +31,10 @@ fun main() {
     val avroSchemaInfo = getModuleInfo("avro-schema")
     val logger = LoggerFactory.getLogger("app")
     logger.info("Starter: {} => {}", ApplicationInfo.id, avroSchemaInfo)
-    val prometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
-    prometheusMeterRegistry.registerMainAvroSchemaGauges()
     val kafkaConfig = loadNaisOrLocalConfiguration<KafkaConfig>(KAFKA_STREAMS_CONFIG_WITH_SCHEME_REG)
     val applicationConfig = loadNaisOrLocalConfiguration<ApplicationConfiguration>(APPLICATION_CONFIG_FILE)
+    val prometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+    registerAppInfoGauges(prometheusMeterRegistry, applicationConfig)
     val streamsConfig = KafkaStreamsFactory(applicationConfig.applicationIdSuffix, kafkaConfig)
         .withDefaultKeySerde(LongSerde::class)
         .withDefaultValueSerde(SpecificAvroSerde::class)
@@ -71,5 +74,36 @@ fun main() {
         health = health
     ).start(true)
     logger.info("Applikasjon stoppet")
+}
+
+private fun registerAppInfoGauges(
+    prometheusMeterRegistry: PrometheusMeterRegistry,
+    applicationConfig: ApplicationConfiguration
+) {
+    prometheusMeterRegistry.registerMainAvroSchemaGauges()
+    prometheusMeterRegistry.registerTopicVersionGauge(
+        topicInfo(
+            topic = applicationConfig.profileringTopic,
+            messageType = Profilering.`SCHEMA$`.name,
+            description = "Profilering av arbeidssøkere",
+            topicOperation = TopicOperation.WRITE
+        )
+    )
+    prometheusMeterRegistry.registerTopicVersionGauge(
+        topicInfo(
+            topic = applicationConfig.periodeTopic,
+            messageType = Periode.`SCHEMA$`.name,
+            description = "Arbeidssøkerperioder",
+            topicOperation = TopicOperation.READ
+        )
+    )
+    prometheusMeterRegistry.registerTopicVersionGauge(
+        topicInfo(
+            topic = applicationConfig.opplysningerTopic,
+            messageType = OpplysningerOmArbeidssoeker.`SCHEMA$`.name,
+            description = "Opplysninger om arbeidssøkere",
+            topicOperation = TopicOperation.READ
+        )
+    )
 }
 
