@@ -4,10 +4,13 @@ plugins {
     kotlin("jvm") version "1.9.20"
     id("io.ktor.plugin") version "2.3.5"
     id("com.github.davidmc24.gradle.plugin.avro") version "1.9.1"
+    id("com.google.cloud.tools.jib") version "3.4.1"
     application
 }
+val jvmVersion = JavaVersion.VERSION_21
+val image: String? by project
 
-val arbeidssokerregisteretVersion = "1.8537427677.37-1"
+val arbeidssokerregisteretVersion = "1.8657441125.42-1"
 val navCommonModulesVersion = "3.2023.12.12_13.53-510909d4aa1a"
 val logstashVersion = "7.3"
 val logbackVersion = "1.4.12"
@@ -78,13 +81,7 @@ tasks.named("generateAvroProtocol", GenerateAvroProtocolTask::class.java) {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
-    }
-}
-
-ktor {
-    fatJar {
-        archiveFileName.set("fat.jar")
+        languageVersion = JavaLanguageVersion.of(jvmVersion.majorVersion)
     }
 }
 
@@ -108,4 +105,9 @@ tasks.withType(Jar::class) {
         attributes["Implementation-Title"] = rootProject.name
         attributes["Main-Class"] = application.mainClass.get()
     }
+}
+
+jib {
+    from.image = "ghcr.io/navikt/baseimages/temurin:${jvmVersion.majorVersion}"
+    to.image = "${image ?: rootProject.name }:${project.version}"
 }
