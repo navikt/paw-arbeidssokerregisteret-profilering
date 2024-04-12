@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - dev/*
+env:
+  IMAGE: europe-north1-docker.pkg.dev/${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}/paw/${{ github.event.repository.name }}
 
 jobs:
   build:
