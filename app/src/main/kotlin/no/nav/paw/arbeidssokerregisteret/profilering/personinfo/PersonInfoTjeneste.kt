@@ -18,6 +18,8 @@ import no.nav.paw.pdl.hentFoedsel
 import java.time.LocalDate
 import java.util.*
 
+const val BEHANDLINGSNUMMER = "B452"
+
 fun interface PersonInfoTjeneste {
     fun hentPersonInfo(identitetsnummer: String, opplysningsId: UUID): PersonInfo
 
@@ -45,6 +47,7 @@ fun interface PersonInfoTjeneste {
                             ident = identitetsnummer,
                             callId = opplysningsId.toString(),
                             navConsumerId = ApplicationInfo.name,
+                            behandlingsnummer = BEHANDLINGSNUMMER
                         )
                     }
                     foedselDeferred.await().let { foedsel ->
