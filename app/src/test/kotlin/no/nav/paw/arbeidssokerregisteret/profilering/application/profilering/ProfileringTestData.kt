@@ -4,7 +4,6 @@ import no.nav.paw.aareg.Ansettelsesperiode
 import no.nav.paw.aareg.Arbeidsforhold
 import no.nav.paw.aareg.Arbeidsgiver
 import no.nav.paw.aareg.Opplysningspliktig
-import no.nav.paw.arbeidssokerregisteret.api.v2.Annet
 import no.nav.paw.arbeidssokerregisteret.api.v1.BeskrivelseMedDetaljer
 import no.nav.paw.arbeidssokerregisteret.api.v1.Bruker
 import no.nav.paw.arbeidssokerregisteret.api.v1.BrukerType
@@ -15,6 +14,7 @@ import no.nav.paw.arbeidssokerregisteret.api.v1.Metadata
 import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
 import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
 import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
+import no.nav.paw.arbeidssokerregisteret.api.v2.Annet
 import no.nav.paw.arbeidssokerregisteret.api.v4.OpplysningerOmArbeidssoeker
 import no.nav.paw.arbeidssokerregisteret.api.v4.Utdanning
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfo
@@ -68,7 +68,8 @@ object ProfileringTestData {
                 sendtInnTidspunkt,
                 bruker,
                 kilde,
-                "unit-test"
+                "unit-test",
+                null
             ),
             utdanning,
             helse,
@@ -88,7 +89,8 @@ object ProfileringTestData {
             Instant.now(),
             bruker,
             "test",
-            "test"
+            "test",
+            null
         ),
         ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING,
         false,
@@ -129,13 +131,15 @@ object ProfileringTestData {
         tidspunkt,
         bruker,
         "test",
-        "test"
+        "test",
+        null
     )
     val metadata = Metadata(
         today.minusYears(1).toInstant(),
         bruker,
         "test",
-        "test"
+        "test",
+        null
     )
 
     val periode = Periode(

@@ -5,6 +5,7 @@ import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
 import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
 import no.nav.paw.arbeidssokerregisteret.profilering.application.profilering.ProfileringsTagger.*
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfo
+import java.time.Instant
 import java.time.Period
 import java.time.ZoneId
 
@@ -18,9 +19,10 @@ fun profiler(
     opplysninger: OpplysningerOmArbeidssoeker,
     veilarbModus: Boolean = opplysninger.sendtInnAvVeilarb()
 ): Profilering {
-    val sendtInnTidspunkt = opplysninger.sendtInnAv.tidspunkt
-    val sendtInnDato = sendtInnTidspunkt.atZone(ZoneId.systemDefault()).toLocalDate()
-    val alder = alderVedTidspunkt(sendtInnTidspunkt, personInfo)
+    val tidspunktFraKilde = opplysninger.sendtInnAv.tidspunkt
+    val profileringTidspunkt = Instant.now()
+    val sendtInnDato = tidspunktFraKilde.atZone(ZoneId.systemDefault()).toLocalDate()
+    val alder = alderVedTidspunkt(tidspunktFraKilde, personInfo)
     val evalueringer =
                 evaluerAnnet(opplysninger.annet) +
                 evaluerAlder(alder) +
@@ -44,7 +46,9 @@ fun profiler(
             alder = alder,
             opplysninger = opplysninger,
             profilering = profilering,
-            harJobbetSammenhengende6AvSiste12Mnd = evalueringer.contains(OPPFYLLER_KRAV_TIL_ARBEIDSERFARING)
+            harJobbetSammenhengende6AvSiste12Mnd = evalueringer.contains(OPPFYLLER_KRAV_TIL_ARBEIDSERFARING),
+            profileringTidspunkt = profileringTidspunkt,
+            tidspunktFraKilde = tidspunktFraKilde
         )
     return when {
         evalueringer.anbefalerArbeidsevnevudering() -> resultat(ProfilertTil.OPPGITT_HINDRINGER)

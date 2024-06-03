@@ -1,16 +1,22 @@
 package no.nav.paw.arbeidssokerregisteret.profilering.application.profilering
 
-import no.nav.paw.arbeidssokerregisteret.api.v1.*
+import no.nav.paw.arbeidssokerregisteret.api.v1.BeskrivelseMedDetaljer
+import no.nav.paw.arbeidssokerregisteret.api.v1.Bruker
+import no.nav.paw.arbeidssokerregisteret.api.v1.BrukerType
+import no.nav.paw.arbeidssokerregisteret.api.v1.Helse
+import no.nav.paw.arbeidssokerregisteret.api.v1.JaNeiVetIkke
+import no.nav.paw.arbeidssokerregisteret.api.v1.Jobbsituasjon
 import no.nav.paw.arbeidssokerregisteret.api.v1.Metadata
+import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
 import no.nav.paw.arbeidssokerregisteret.api.v2.Annet
 import no.nav.paw.arbeidssokerregisteret.api.v4.OpplysningerOmArbeidssoeker
 import no.nav.paw.arbeidssokerregisteret.api.v4.Utdanning
 import java.time.Duration
-import no.nav.paw.arbeidssokerregisteret.api.v1.Metadata as ApiMetadata
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.*
+import no.nav.paw.arbeidssokerregisteret.api.v1.Metadata as ApiMetadata
 
 
 fun periode(
@@ -80,7 +86,8 @@ fun metadata(
     tidspunkt,
     bruker,
     "1",
-    "2"
+    "2",
+    null
 )
 
 fun bruker(

@@ -10,10 +10,10 @@ import no.nav.paw.arbeidssokerregisteret.api.v1.Periode
 import no.nav.paw.arbeidssokerregisteret.api.v1.Profilering
 import no.nav.paw.arbeidssokerregisteret.api.v1.ProfilertTil
 import no.nav.paw.arbeidssokerregisteret.api.v4.OpplysningerOmArbeidssoeker
-import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoTopicSerde
 import no.nav.paw.arbeidssokerregisteret.profilering.application.APPLICATION_CONFIG_FILE
 import no.nav.paw.arbeidssokerregisteret.profilering.application.ApplicationConfiguration
 import no.nav.paw.arbeidssokerregisteret.profilering.application.applicationTopology
+import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoTopicSerde
 import no.nav.paw.config.hoplite.loadNaisOrLocalConfiguration
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.KeyValue
@@ -177,7 +177,7 @@ class ApplicationTest : FreeSpec({
             profileringsTopic.isEmpty shouldBe false
             val testRecord1 = profileringsTopic.readRecord()
             testRecord1.key shouldBe key
-            Instant.ofEpochMilli(testRecord1.timestamp()) shouldBe startPeriode.startet.tidspunkt
+            testRecord1.value().sendtInnAv.tidspunktFraKilde?.tidspunkt shouldBe opplysninger.sendtInnAv.tidspunkt
             verifyEmptyTopic(profileringsTopic)
             val keyValueStore: KeyValueStore<UUID, TopicsJoin> = testDriver.getKeyValueStore(
                 applicationConfig.joiningStateStoreName

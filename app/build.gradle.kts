@@ -10,7 +10,7 @@ plugins {
 val jvmVersion = JavaVersion.VERSION_21
 val image: String? by project
 
-val arbeidssokerregisteretVersion = "1.8657441125.42-1"
+val arbeidssokerregisteretVersion = "1.9348086045.48-1"
 val navCommonModulesVersion = "3.2023.12.12_13.53-510909d4aa1a"
 val logstashVersion = "7.3"
 val logbackVersion = "1.4.12"

@@ -10,9 +10,11 @@ import no.nav.paw.arbeidssokerregisteret.profilering.application.profilering.sen
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoTjeneste
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoTopic
 import no.nav.paw.arbeidssokerregisteret.profilering.personinfo.PersonInfoTopicSerde
+import no.nav.paw.arbeidssokerregisteret.profilering.utils.Quadruple
 import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.kstream.KStream
 import org.apache.kafka.streams.kstream.Produced
+import org.apache.kafka.streams.processor.api.ProcessorSupplier
 import org.slf4j.LoggerFactory
 
 private val logger = LoggerFactory.getLogger("applicationTopology")
@@ -60,8 +62,9 @@ fun KStream<Long, TopicsJoin>.filterProfileAndForward(
         }
 
     branches
-        .mapValues {_, value -> value.second}
+        .mapValues { _, value -> value.second }
         .filter { _, value -> value is Profilering }
+        .process(ProcessorSupplier { TimestampProcessor<Long, Profilering>() })
         .to(applicationConfiguration.profileringTopic)
 
     branches
@@ -70,5 +73,3 @@ fun KStream<Long, TopicsJoin>.filterProfileAndForward(
         }
         .to(applicationConfiguration.profileringGrunnlagTopic, Produced.with(Serdes.Long(), PersonInfoTopicSerde()))
 }
-
-data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
