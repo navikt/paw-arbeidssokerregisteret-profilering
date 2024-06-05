@@ -71,5 +71,6 @@ fun KStream<Long, TopicsJoin>.filterProfileAndForward(
         .mapValues { _, (personInfo, profilering) ->
             PersonInfoTopic(profileringId = profilering.id, personInfo = personInfo)
         }
+        .process(ProcessorSupplier { TimestampProcessor<Long, PersonInfoTopic>() })
         .to(applicationConfiguration.profileringGrunnlagTopic, Produced.with(Serdes.Long(), PersonInfoTopicSerde()))
 }
