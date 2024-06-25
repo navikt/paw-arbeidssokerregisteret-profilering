@@ -1,8 +1,7 @@
 package no.nav.paw.arbeidssokerregisteret.profilering.utils
 
 object ApplicationInfo {
-    private val pkg = this::class.java.`package`
-    val version: String? = pkg.implementationVersion
-    val name: String? = pkg.implementationTitle
-    val id = "$name-$version"
+    val version: String? = System.getenv("PROFILERING_APPLICATION_VERSION")
+    val name: String? = System.getenv("PROFILERING_APPLICATION_ID")
+    val id get() = "$name-$version"
 }
