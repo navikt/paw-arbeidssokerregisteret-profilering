@@ -147,4 +147,20 @@ class ProfileringKtTest : FreeSpec({
             )
         ).profilertTil shouldBe ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
     }
+    "En med 'kilde = noe annet' og som har vært i jobb i over et år skal gi ${ProfilertTil.ANTATT_GODE_MULIGHETER}" {
+        val sendtInnTidspunkt = LocalDate.of(2021, 6, 21).toInstant()
+        val resultat = profiler(
+            ProfileringTestData.standardBrukerPersonInfo(
+                arbeidsforhold = listOf(
+                    arbeidsforhold(fra = "2018-08-01", til = null)
+                )
+            ),
+            ProfileringTestData.standardOpplysninger(
+                sendtInnTidspunkt = sendtInnTidspunkt,
+                kilde = "noe annet"
+            )
+        )
+        resultat.jobbetSammenhengendeSeksAvTolvSisteMnd shouldBe true
+        resultat.profilertTil shouldBe ProfilertTil.ANTATT_GODE_MULIGHETER
+    }
 })

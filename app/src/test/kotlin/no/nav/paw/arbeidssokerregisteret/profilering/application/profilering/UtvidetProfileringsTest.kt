@@ -73,6 +73,47 @@ class UtvidetProfileringsTest : FreeSpec({
                 forventetAlder = 62,
                 forventetHarJobbetSammenhengendeSiste12Mnd = true,
                 forventetProfilertTil = ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
+            ),
+            test("Er 59 år og har jobbet sammenhende i 12 av de 12 siste månedene, er fremdeles i jobb",
+                personInfo(
+                    arbeidsforhold(fra = "2010-01-01", til = null),
+                    arbeidsforhold(fra = "2008-03-15", til = "2009-04-01"),
+                    arbeidsforhold(fra = "2000-04-02", til = "2006-07-01"),
+                    foedselsdato = "1961-02-27"
+                ),
+                opplysninger(
+                    sendtIn = "2020-07-02",
+                    utdanning = utdanning(
+                        bestaatt = JaNeiVetIkke.JA,
+                        godkjent = JaNeiVetIkke.JA
+                    ),
+                    helseHindrerArbeid = JaNeiVetIkke.NEI,
+                    annetHindrerArbeid = JaNeiVetIkke.NEI
+                ),
+                forventetAlder = 59,
+                forventetHarJobbetSammenhengendeSiste12Mnd = true,
+                forventetProfilertTil = ProfilertTil.ANTATT_GODE_MULIGHETER
+            ),
+            test("Er 59 år og har ikke jobbet sammenhende i 6 av de 12 siste månedene, er fremdeles i jobb",
+                personInfo(
+                    arbeidsforhold(fra = "2020-07-01", til = null),
+                    arbeidsforhold(fra = "2020-06-01", til = "2020-06-30"),
+                    arbeidsforhold(fra = "2020-05-02", til = "2029-04-15"),
+                    arbeidsforhold(fra = "2010-05-02", til = "2019-07-15"),
+                    foedselsdato = "1961-02-27"
+                ),
+                opplysninger(
+                    sendtIn = "2020-07-02",
+                    utdanning = utdanning(
+                        bestaatt = JaNeiVetIkke.JA,
+                        godkjent = JaNeiVetIkke.JA
+                    ),
+                    helseHindrerArbeid = JaNeiVetIkke.NEI,
+                    annetHindrerArbeid = JaNeiVetIkke.NEI
+                ),
+                forventetAlder = 59,
+                forventetHarJobbetSammenhengendeSiste12Mnd = false,
+                forventetProfilertTil = ProfilertTil.ANTATT_BEHOV_FOR_VEILEDNING
             )
         ).map { (beskrivelse, personInfo, opplysninger, forventetAlder, forventetHarJobbetSammenhengendeSiste12Mnd, forventetProfilertTil) ->
             beskrivelse {

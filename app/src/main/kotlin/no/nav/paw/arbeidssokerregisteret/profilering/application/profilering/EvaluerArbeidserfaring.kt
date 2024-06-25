@@ -7,6 +7,9 @@ import java.time.Period
 import java.time.temporal.ChronoUnit
 import kotlin.Comparator
 
+infix fun OpenEndRange<LocalDate>.overlapsWith(other: OpenEndRange<LocalDate>): Boolean =
+    start < other.endExclusive && endExclusive > other.start
+
 fun evaluerArbeidsErfaring(
     marginForSammenhengendeJobbDager: Int,
     minimumsArbeidserfaring: Period,
@@ -37,8 +40,7 @@ fun lengsteSammenhengendeInnenforPeriode(
 ): SammhengendeJobb? =
     arbeidsforhold.flettSammenhengendeJobber(marginForSammenhengendeJobbDager)
         .filter { sammenhengendePeriode ->
-            val range = sammenhengendePeriode.tid
-            periode.contains(range.start) || periode.contains(range.endExclusive)
+            sammenhengendePeriode.tid overlapsWith periode
         }.maxWithOrNull(sammhengendeJobbLengdeComperator(periode))
 
 fun sammhengendeJobbLengdeComperator(innenForPeriode: OpenEndRange<LocalDate>) = Comparator<SammhengendeJobb> { o1, o2 ->
@@ -98,8 +100,9 @@ data class SammhengendeJobb(
         )
 
     fun erDelAv(arbeidsforhold: Arbeidsforhold): Boolean {
-        return tidMedMargin.contains(arbeidsforhold.ansettelsesperiode.periode.fom) ||
-                tidMedMargin.contains(arbeidsforhold.ansettelsesperiode.periode.tom ?: LocalDate.MAX)
+        return tidMedMargin overlapsWith arbeidsforhold.ansettelsesperiode.periode.fom.rangeUntil(
+            arbeidsforhold.ansettelsesperiode.periode.tom ?: LocalDate.MAX
+        )
     }
 
     fun leggTil(arbeidsforhold: Arbeidsforhold): SammhengendeJobb {
