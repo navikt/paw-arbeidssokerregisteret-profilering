@@ -11,7 +11,7 @@ val jvmVersion = JavaVersion.VERSION_21
 val image: String? by project
 
 val arbeidssokerregisteretVersion = "1.9348086045.48-1"
-val navCommonModulesVersion = "3.2023.12.12_13.53-510909d4aa1a"
+val navCommonModulesVersion = "3.2024.05.23_05.46-2b29fa343e8e"
 val logstashVersion = "7.3"
 val logbackVersion = "1.4.12"
 val pawUtilsVersion = "24.03.25.14-1"
@@ -19,6 +19,7 @@ val pawPdlClientsVersion = "24.07.04.39-1"
 val pawAaRegClientVersion = "24.07.04.18-1"
 val kafkaStreamsVersion = "3.6.0"
 val jacksonVersion = "2.16.1"
+val ktorVersion = "2.3.12"
 
 val schema by configurations.creating {
     isTransitive = false
@@ -30,10 +31,22 @@ dependencies {
     implementation("no.nav.paw:aareg-client:$pawAaRegClientVersion")
     implementation("no.nav.paw:pdl-client:$pawPdlClientsVersion")
 
-    implementation(pawObservability.bundles.ktorNettyOpentelemetryMicrometerPrometheus)
     implementation("no.nav.paw.hoplite-config:hoplite-config:$pawUtilsVersion")
 
     implementation("no.nav.common:token-client:$navCommonModulesVersion")
+
+    //ktor server
+    implementation("io.ktor:ktor-server-core:$ktorVersion")
+    implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-netty:$ktorVersion")
+    implementation("io.ktor:ktor-server-metrics-micrometer:$ktorVersion")
+
+    //Otel
+    implementation("io.opentelemetry:opentelemetry-api:1.39.0")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-ktor-2.0:2.4.0-alpha")
+
+    // Micrometer
+    implementation("io.micrometer:micrometer-registry-prometheus:1.12.3")
 
     // Ktor client
     implementation("io.ktor:ktor-server-status-pages:${pawObservability.versions.ktor}")
@@ -50,8 +63,8 @@ dependencies {
     // Kafka
     implementation("no.nav.paw.kafka:kafka:$pawUtilsVersion")
     implementation("no.nav.paw.kafka-streams:kafka-streams:$pawUtilsVersion")
-    implementation("io.confluent:kafka-avro-serializer:7.5.3")
-    implementation("io.confluent:kafka-streams-avro-serde:7.5.3")
+    implementation("io.confluent:kafka-avro-serializer:7.6.0")
+    implementation("io.confluent:kafka-streams-avro-serde:7.6.0")
     implementation("org.apache.avro:avro:1.11.3")
     implementation("org.apache.kafka:kafka-clients:$kafkaStreamsVersion")
     implementation("org.apache.kafka:kafka-streams:$kafkaStreamsVersion")
