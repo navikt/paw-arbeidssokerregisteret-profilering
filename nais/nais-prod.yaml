@@ -15,10 +15,10 @@ spec:
     max: 6
   resources:
     limits:
-      memory: 1000Mi
+      memory: 2Gi
     requests:
       cpu: 50m
-      memory: 500Mi
+      memory: 1024Mi
   kafka:
     pool: nav-prod
     streams: true
